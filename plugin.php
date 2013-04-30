@@ -30,18 +30,35 @@ License:
 define( 'CELL_USER_FILE', __FILE__ );
 define( 'CELL_USER', dirname( __FILE__ ) );
 define( 'CELL_USER_PATH', plugin_dir_path(__FILE__) );
-define( 'CELL_USER_TEXT_DOMAIN', 'cell-store' );
+define( 'CELL_USER_TEXT_DOMAIN', 'cell-user' );
 
 // set for internationalization
 function cell_user_init() {
-	load_plugin_textdomain('cell-store', false, basename( dirname( __FILE__ ) ) . '/lang' );
+	load_plugin_textdomain('cell-user', false, basename( dirname( __FILE__ ) ) . '/lang' );
 }
 add_action('plugins_loaded', 'cell_user_init');
+
+
+/* session
+---------------------------------------------------------------
+*/
+
+  if (!session_id()) {
+    session_start();
+  }
+
+  $global_message = isset( $_SESSION['global_message'] ) ? $_SESSION['global_message'] : false;
+  if ( isset( $_SESSION['global_message'] ) ) unset( $_SESSION['global_message'] );
+
 
 /* global 
 ---------------------------------------------------------------
 */
 
-include_once ('settings.php');
+// include_once ('settings.php');
 
-// include_once ('cell-user-options.php');
+include_once ('common-functions.php');
+
+include_once ('login/login.php');
+
+include_once ('register/register.php');
