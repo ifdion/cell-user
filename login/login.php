@@ -12,10 +12,10 @@ class CellLogin {
 
 	function __construct($args) {
 		// get the login page
-		$login_page = $args['page'];
+		$this->login_args = $args;
 
 		// include style and scrip
-		add_action( 'template_redirect', array( $this, 'cell_profile_script' ));
+		add_action( 'template_redirect', array( $this, 'login_enqueue' ));
 
 		// add a shortcode
 		add_shortcode('cell-user-login', array( $this, 'shortcode_output'));
@@ -30,15 +30,17 @@ class CellLogin {
 		add_action('wp_ajax_nopriv_frontend_reset_password', array($this, 'process_frontend_reset_password'));
 	}
 	
-	public function cell_profile_script($login_page){
-		if (is_page($login_page)){
+
+	function login_enqueue(){
+		if (is_page($this->login_args['page'])){
 			wp_enqueue_script('login-script', plugins_url().'/cell-user/js/login.js', array('jquery'), '0.1', true);
 			wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
 			wp_localize_script( 'ajaxurl', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
-		}	
+			return TRUE;
+		}
 	}
 
-	public function shortcode_output(){
+	function shortcode_output(){
 		if(!is_user_logged_in()){
 
 			ob_start();
@@ -58,7 +60,7 @@ class CellLogin {
 		}
 	}
 
-	public function process_login() {
+	function process_login() {
 		if ( empty($_POST) || !wp_verify_nonce($_POST['login_nonce'],'frontend_login') ) {
 			echo 'Sorry, your nonce did not verify.';
 			die();
@@ -106,7 +108,7 @@ class CellLogin {
 		}
 	}
 
-	public function process_forgot_password() {
+	function process_forgot_password() {
 		if ( empty($_POST) || !wp_verify_nonce($_POST['forgot_password_nonce'],'frontend_forgot_password') ) {
 			echo 'Sorry, your nonce did not verify.';
 			die();
@@ -170,7 +172,7 @@ class CellLogin {
 		}
 	}
 
-	public function process_frontend_reset_password() {
+	function process_frontend_reset_password() {
 		if ( empty($_POST) || !wp_verify_nonce($_POST['reset_password_nonce'],'frontend_reset_password') ) {
 			echo 'Sorry, your nonce did not verify.';
 			die();
