@@ -62,3 +62,6 @@ include_once ('common-functions.php');
 include_once ('login/login.php');
 
 include_once ('register/register.php');
+
+include_once ('profile/profile.php');
+
