@@ -10,29 +10,46 @@
 class CellRegister {
 
 	function __construct($args) {
-		// get the registratiob page
-		$register_page = $args['page'];
+		// get the registration args
+		$this->register_args = $args;
+		$this->default_fields = array(
+			'username' => array( // the key will be used in the label for attribute and the input name
+				'title' => __('Username', 'cell-user'), // the label text
+				'type' => 'text', // the input type or textarea
+				'required' => 1, // is it required? 1 or 0
+				'required_text' => __('(required)', 'cell-user'),
+				'note' =>__('Use 3 - 15 character lowercase, numbers and \'- \' only', 'cell-user') // does it need a helper note, use inline html tags only
+			),
+			'email' => array(
+				'title' => __('Email', 'cell-user'),
+				'type' => 'text',
+				'required' => 1,
+				'note' => ''
+			),
+			'password' => array(
+				'title' => __('Password', 'cell-user'),
+				'type' => 'password',
+				'required' => 1,
+				'note' => ''
+			)
+		);
+
+		if (isset($this->register_args['create-blog']) && $this->register_args['create-blog'] == 1) {
+			// create blog
+		}
 
 		// include style and scrip
 		add_action( 'template_redirect', array( $this, 'registration_script'));
-
-		// add_action( $tag, $function_to_add, $priority = 10, $accepted_args = 1 );
 
 		// add a shortcode
 		add_shortcode('cell-user-register', array( $this, 'shortcode_output'));
 
 		// add login ajax handler function
-		add_action('wp_ajax_nopriv_frontend_login', array( $this, 'process_login'));
-
-		// add forgot password ajax handler function
-		add_action('wp_ajax_nopriv_frontend_forgot_password', array($this, 'process_forgot_password'));
-
-		// add reset password ajax handler function
-		add_action('wp_ajax_nopriv_frontend_reset_password', array($this, 'process_frontend_reset_password'));
+		add_action('wp_ajax_nopriv_frontend_registration', array( $this, 'process_frontend_registration'));
 	}
 	
-	public function registration_script($register_page){
-		if (is_page($register_page)){
+	public function registration_script(){
+		if (is_page($this->register_args['page'])){
 			wp_enqueue_script('register-script', plugins_url().'/cell-user/js/register.js', array('jquery'), '0.1', true);
 			wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
 			wp_localize_script( 'ajaxurl', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
@@ -40,6 +57,13 @@ class CellRegister {
 	}
 
 	public function shortcode_output(){
+
+		if (isset($this->register_args['fields'])) {
+			$registration_field = $this->register_args['fields'];
+		} else {
+			$registration_field = $this->default_fields;
+		}
+
 		if(!is_user_logged_in()){
 			ob_start();
 			include('views/custom-registration-form.php');
@@ -49,6 +73,60 @@ class CellRegister {
 			echo $register_form;		
 		} else {
 			return false;
+		}
+	}
+
+	public function process_frontend_registration() {
+		if ( empty($_POST) || !wp_verify_nonce($_POST['registration_nonce'],'frontend_registration') ) {
+			echo 'Sorry, your nonce did not verify.';
+			die();
+		} else {
+			// validate data
+			$username = $_POST['username'];
+			$email = $_POST['email'];
+			$password = $_POST['password'];
+			$return = $_POST['_wp_http_referer'];
+
+			if(preg_match('/^[a-z0-9_-]{3,15}$/i', $username) == 0){
+				$error['type'] = 'error';
+				$error['message'] = __('Username not valid.', 'cell-user');
+				ajax_response($error,$return);
+
+			} elseif(!is_email($email))	{
+				$error['type'] = 'error';
+				$error['message'] = __('Email not valid.', 'cell-user');
+				ajax_response($error,$return);
+
+			} elseif($password == "") {
+				$error['type'] = 'error';
+				$error['message'] = __('Password empty.', 'cell-user');
+				ajax_response($error,$return);
+
+			} elseif( username_exists($username) || email_exists($email) ){
+				$error['type'] = 'error';
+				$error['message'] = __('Username or email already registered.', 'cell-user');
+				ajax_response($error,$return);
+
+			} else {
+				$user_registration_data = array(
+					'user_login' => $username,
+					'user_pass' => $password,
+					'user_email' => $email,
+					'role' => get_option('default_role')
+				);
+				$user_id = wp_insert_user( $user_registration_data );
+				$notifcation = wp_new_user_notification($user_id, $password);
+				$login = wp_signon( array( 'user_login' => $username, 'user_password' => $password, 'remember' => false ), false );
+
+				$return = get_bloginfo('url');
+
+				// registration result
+				$success['type'] = 'success';
+				$success['message'] = __('Registration Success.', 'cell-user');
+				ajax_response($success,$return);
+				
+			}		
+			die();
 		}
 	}
 
