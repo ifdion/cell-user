@@ -1,6 +1,5 @@
 <?php if (!is_user_logged_in()): ?>
 	<?php
-		global $registration_field;
 	?>
 	<form id="register-form" name="register-form" class="well form-horizontal" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post" enctype="multipart/form-data">
 		<?php foreach ($registration_field as $key => $value): ?>
