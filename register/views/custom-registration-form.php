@@ -4,7 +4,7 @@
 	<form id="register-form" name="register-form" class="well form-horizontal" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post" enctype="multipart/form-data">
 		<?php foreach ($registration_field as $key => $value): ?>
 			<?php
-				if ($value['required']) {
+				if (isset($value['required'])) {
 					$required['class'] = 'required';
 					if (isset($value['required_text'])) {
 						$required['text'] = $value['required_text'];
