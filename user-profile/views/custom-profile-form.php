@@ -1,6 +1,23 @@
 <?php
+
+	/**
+	 * Default custom user profile form
+	 * 
+	 * TODO :
+	 * input option from tax_*
+	 * input option from cpt_*
+	 * input option from function
+	 * input type : textsuggest
+	 * input type : multiple select
+	 * input type : checkbox group
+	 * input type : file
+	 * input type : datepicker
+	 * 
+	 * 
+	 **/
+
 	global $current_user;
-	$user_data = get_user_meta($current_user->ID);
+	$user_meta = get_user_meta($current_user->ID);
 ?>
 <form id="edit-profile" name="edit-profile" class="well form-horizontal" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post" enctype="multipart/form-data">
 	<fieldset id="user-account">
@@ -32,13 +49,20 @@
 				<legend><h4><?php echo $value['title'] ?></h4></legend>
 				<?php foreach ($value['fields'] as $field_key => $field_value): ?>
 					<?php
+						if (isset($user_meta[$field_key][0])) {
+							$current_value = $user_meta[$field_key][0];
+						} else {
+							$current_value = '';
+						}
+					?>
+					<?php
 						switch ($field_value['type']) {
 							case 'text':
 								?>
 									<div class="control-group">
 										<label class="control-label" for="<?php echo $field_key ?>"><?php echo $field_value['title'] ?></label>
 										<div class="controls">
-											<input type="text" class="input-xlarge " id="<?php echo $field_key ?>" name="<?php echo $field_key ?>" value="<?php echo $user_data[$field_key][0] ?>">
+											<input type="text" class="input-xlarge " id="<?php echo $field_key ?>" name="<?php echo $field_key ?>" value="<?php echo $current_value ?>">
 										</div>
 									</div>
 								<?php
@@ -48,7 +72,7 @@
 									<div class="control-group">
 										<label class="control-label" for="<?php echo $field_key ?>"><?php echo $field_value['title'] ?></label>
 										<div class="controls">
-											<textarea type="checkbox" class="input-xlarge " id="<?php echo $field_key ?>" name="<?php echo $field_key ?>"><?php echo $user_data[$field_key][0] ?></textarea>
+											<textarea type="checkbox" class="input-xlarge " id="<?php echo $field_key ?>" name="<?php echo $field_key ?>"><?php echo $current_value ?></textarea>
 										</div>
 									</div>
 								<?php
@@ -58,7 +82,7 @@
 									<div class="control-group">
 										<div class="controls">
 											<label class="checkbox" for="<?php echo $field_key ?>">
-												<input type="checkbox" class="input-xlarge " id="<?php echo $field_key ?>" name="<?php echo $field_key ?>" value="1" <?php checked($user_data[$field_key][0], 1) ?>>
+												<input type="checkbox" class="input-xlarge " id="<?php echo $field_key ?>" name="<?php echo $field_key ?>" value="1" <?php checked($current_value, 1) ?>>
 												<?php echo $field_value['title'] ?>
 											</label>
 										</div>
@@ -70,19 +94,39 @@
 									<div class="control-group">
 										<label class="control-label"><?php echo $field_value['title'] ?></label>
 										<div class="controls">
-											<?php foreach ($field_value['option'] as $option_value => $option_title): ?>
-												<label class="radio inline">
-													<input type="radio" id="inlineCheckbox1" value="<?php echo $option_value ?>" name="<?php echo $field_key ?>" <?php checked($user_data[$field_key][0], $option_value) ?> > <?php echo $option_title ?>
-												</label>
-											<?php endforeach ?>
+											<?php if (isset($field_value['option'])): ?>
+												<?php foreach ($field_value['option'] as $option_value => $option_title): ?>
+													<label class="radio inline">
+														<input type="radio" id="<?php echo $field_key.'-'.$field_value['option'] ?>" value="<?php echo $option_value ?>" name="<?php echo $field_key ?>" <?php checked($current_value, $option_value) ?> > <?php echo $option_title ?>
+													</label>
+												<?php endforeach ?>
+											<?php else: ?>
+												<?php _e( 'Missing options.','cell-user' ) ?>
+											<?php endif ?>
 										</div>
 									</div>
 								<?php
 							break;
-							
+							case 'select':
+								?>
+									<div class="control-group">
+										<label class="control-label"><?php echo $field_value['title'] ?></label>
+										<div class="controls">
+											<?php if (isset($field_value['option'])): ?>
+												<select name="<?php echo $field_key ?>">
+													<?php foreach ($field_value['option'] as $option_value => $option_title): ?>
+														<option value="<?php echo $option_value ?>"  <?php selected($current_value, $option_value) ?> > <?php echo $option_title ?></option>
+													<?php endforeach ?>
+												</select>
+											<?php else: ?>
+												<?php _e( 'Missing options.','cell-user' ) ?>
+											<?php endif ?>
+										</div>
+									</div>
+								<?php
+							break;
 							default:
-								# code...
-								break;
+							break;
 						}
 					?>
 				<?php endforeach ?>
