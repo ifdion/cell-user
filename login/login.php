@@ -61,6 +61,7 @@ class CellLogin {
 	}
 
 	function process_login() {
+
 		if ( empty($_POST) || !wp_verify_nonce($_POST['login_nonce'],'frontend_login') ) {
 			echo 'Sorry, your nonce did not verify.';
 			die();
@@ -80,31 +81,30 @@ class CellLogin {
 				$login = wp_signon( array( 'user_login' => $user->user_login, 'user_password' => $password, 'remember' => false ), false );
 				if (is_wp_error($login)) {
 					$result['type'] = 'error';
-					$result['message'] = __('Invalid Password.', 'cell-user');
+					$result['message'] = __('Login error, please check your username and password.', 'cell-user');
 					ajax_response($result,$return);
 				} else {
-					$success['type'] = 'success';
-					$success['message'] = __('Login Success.', 'cell-user');
-					ajax_response($success,$return);
+					$result['type'] = 'success';
+					$result['message'] = __('Login Success.', 'cell-user');
+					ajax_response($result,$return);
 				}
 			} elseif (username_exists($username)) {
 				$login = wp_signon( array( 'user_login' => $username, 'user_password' => $password, 'remember' => false ), false );
 				if (is_wp_error($login)) {
 					$result['type'] = 'error';
-					$result['message'] = __('Invalid Password.', 'cell-user');
+					$result['message'] = __('Login error, please check your username and password.', 'cell-user');
 					ajax_response($result,$return);
 				} else {
-					$success['type'] = 'success';
-					$success['message'] = __('Login Success.', 'cell-user');
-					ajax_response($success,$return);
+					$result['type'] = 'success';
+					$result['message'] = __('Login Success.', 'cell-user');
+					ajax_response($result,$return);
 				}
 			} else {
-				$success['type'] = 'error';
-				$success['message'] = __('Username or Email does not exist.', 'cell-user');
-				ajax_response($success,$return);
+				$result['type'] = 'error';
+				$result['message'] = __('Login error, please check your username and password.', 'cell-user');
+				ajax_response($result,$return);
 
 			}
-			die();
 		}
 	}
 
@@ -202,6 +202,9 @@ class CellLogin {
 					ajax_response($result,$return);
 				} else {
 					wp_set_password($password1, $user_data->ID);
+
+					// remove activation key
+					$wpdb->update( $wpdb->users, array("user_activation_key" => ""), array("ID" => $user_data->ID));
 
 					$return_array = explode('?', $return);
 					$base_url = $return_array[0];
