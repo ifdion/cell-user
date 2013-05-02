@@ -63,5 +63,5 @@ include_once ('login/login.php');
 
 include_once ('register/register.php');
 
-include_once ('profile/profile.php');
+include_once ('user-profile/user-profile.php');
 
