@@ -158,79 +158,7 @@ function ucc_right_now_content_table_end() {
 }
 
 
-/* comment : add ajax comment
----------------------------------------------------------------
-*/
-add_action('wp_ajax_add_comment', 'process_add_comment');
 
-function process_add_comment() {
-	global $current_user;
-	if ( empty($_POST) || !wp_verify_nonce($_POST[$current_user->user_login],'add_comment') ) {
-		echo 'You targeted the right function, but sorry, your nonce did not verify. 1';
-		die();
-	} else {
-
-		$return = $_POST['_wp_http_referer'];
-		$post_ID = $_POST['post_id'];
-		$comment_author = $current_user->display_name;
-		$comment_email = $current_user->user_email;
-		$comment_author_id = $current_user->ID;
-		$comment_author_url = get_author_posts_url( $current_user->ID );
-		$comment_author_IP = $_SERVER['REMOTE_ADDR'];
-		$comment_agent = $_SERVER['HTTP_USER_AGENT'];
-		$comment_content = $_POST['comment-content'];
-
-		$comment_data = array(
-			'comment_post_ID' => $post_ID,
-			'comment_author_url' => $comment_author_url,
-			'comment_author' => $comment_author,
-			'comment_author_email' => $comment_email,
-			'comment_author_url' => $comment_author_url,
-			'comment_content' => $comment_content,
-			'comment_author_IP' => $comment_author_IP,
-			'user_id' => $comment_author_id,
-			'comment_agent' => $comment_agent,
-			'comment_date' => date('Y-m-d H:i:s'),
-			'comment_date_gmt' => date('Y-m-d H:i:s'),
-			'comment_approved' => 1,
-		);
-
-		$comment_id = wp_insert_comment($comment_data);
-		
-		$result['type'] = 'success';
-		$result['message'] = 'Komentar sudah ditambahkan.';
-		ajax_response($result,$return);
-	}
-}
-
-/* comment : edit comment
----------------------------------------------------------------
-*/
-
-add_action('wp_ajax_edit_comment', 'process_edit_comment');
-
-function process_edit_comment() {
-	global $current_user;
-	if ( empty($_POST) || !wp_verify_nonce($_POST[$current_user->user_login],'edit_comment') ) {
-		echo 'You targeted the right function, but sorry, your nonce did not verify. 1';
-		die();
-	} else {
-		$return = $_POST['_wp_http_referer'];
-		$comment_ID = $_POST['comment_id'];
-		$comment_content = $_POST['comment'];
-		$parent_ID = $_POST['parent_id'];
-		$return = get_permalink($parent_ID).'#comment-'.$comment_ID;
-		$comment_data = array(
-			'comment_ID' => $comment_ID,
-			'comment_content' => $comment_content
-		);
-		$comment_id = wp_update_comment($comment_data);
-
-		$result['type'] = 'success';
-		$result['message'] = 'Komentar sudah diedit.';
-		ajax_response($result,$return);
-	}
-}
 
 /* print global message  (errors, validation, redirects dll)
 ---------------------------------------------------------------
@@ -270,27 +198,6 @@ function get_post_object($term_id,$taxonomy) {
 
 	return $object;
 	
-}
-
-/* save the file name as attachment title 
----------------------------------------------------------------
-*/
-add_action('add_attachment', 'set_title');
-
-function set_title($attachment_id){
-	$attachment_post = get_post($attachment_id);
-	if ($attachment_post->guid) {
-		$attachment_explode = explode('/', $attachment_post->guid);
-		$attachment_name = str_replace('-', ' ', end($attachment_explode));
-		$attachment_name = str_replace('.jpg', '', $attachment_name);
-
-		$post_args = array(
-			'ID' => $attachment_id,
-			'post_title' => $attachment_name,
-		);
-
-		wp_update_post($post_args);
-	}
 }
 
 /* update post meta, if new
