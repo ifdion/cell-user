@@ -5,10 +5,8 @@
 if (!function_exists('ajax_request')) {
 	function ajax_request(){
 		if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-			$result = json_encode($result);
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
