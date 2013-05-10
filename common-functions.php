@@ -2,6 +2,7 @@
 /* ajax : custom function to detect wheter a request is made by ajax or not
 ---------------------------------------------------------------
 */
+
 if (!function_exists('ajax_request')) {
 	function ajax_request(){
 		if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
@@ -18,25 +19,39 @@ if (!function_exists('ajax_request')) {
 
 if (!function_exists('ajax_response')) {
 	function ajax_response($data,$redirect = false){
-			if(ajax_request()){
-				$data_json = json_encode($data);
-				echo $data_json;			
-			} else {
-				$_SESSION['global_message'][] = $data;
-			}
-			if ($redirect) {
-				wp_redirect( $redirect );
-				exit;
-				die();
-			}
+		if(ajax_request()){
+			$data_json = json_encode($data);
+			echo $data_json;			
+		} else {
+			$_SESSION['global_message'][] = $data;
+		}
+		if ($redirect) {
+			wp_redirect( $redirect );
+			exit;
+			die();
+		}
 	}	
+}
+
+/* global message 
+---------------------------------------------------------------
+*/
+
+add_action( 'init', 'setup_global_message');
+
+if (!function_exists('setup_global_message')) {
+	function setup_global_message(){
+		global $global_message;
+		if ( isset( $_SESSION['global_message'] ) ){
+			$global_message = $_SESSION['global_message'];
+			unset( $_SESSION['global_message'] );
+		}
+	}
 }
 
 if (!function_exists('the_global_message')) {
 	function the_global_message(){
-
 		global $global_message;
-
 		if ($global_message != '' && (count($global_message) > 0)) {
 			foreach ($global_message as $message){
 				?>
@@ -46,6 +61,7 @@ if (!function_exists('the_global_message')) {
 				<?php
 			}
 		}
+		$global_message = false;
 	}	
 }
 
