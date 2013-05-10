@@ -38,25 +38,51 @@ class CellRegister {
 			// create blog
 		}
 
-		// include style and scrip
-		add_action( 'template_redirect', array( $this, 'registration_script'));
-
 		// add a shortcode
 		add_shortcode('cell-user-register', array( $this, 'shortcode_output'));
 
+		// add a redirect for logged out user
+		add_action('template_redirect', array( $this, 'redirect_user'));
+
 		// add login ajax handler function
 		add_action('wp_ajax_nopriv_frontend_registration', array( $this, 'process_frontend_registration'));
-	}
-	
-	public function registration_script(){
-		if (is_page($this->register_args['page'])){
-			wp_enqueue_script('register-script', plugins_url().'/cell-user/js/register.js', array('jquery'), '0.1', true);
-			wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
-			wp_localize_script( 'ajaxurl', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
-		}	
+
+		// register script
+		add_action('init', array($this, 'cell_enqueue'));
+
+		// print script
+		add_action('wp_footer', array($this, 'print_register_script'));
 	}
 
-	public function shortcode_output(){
+	function redirect_user(){
+		if (isset($this->register_args['page']) && is_page($this->register_args['page']) && is_user_logged_in()){
+			$result['type'] = 'notice';
+			$result['message'] = __('You are logged in.', 'cell-user');
+			if (isset($this->register_args['page-redirect'])) {
+				$return = get_permalink( get_page_by_path( $this->register_args['page-redirect'] ) );
+			} else{
+				$return = get_bloginfo('url');
+			}
+			ajax_response($result,$return);
+		}
+	}
+
+	function cell_enqueue() {
+		wp_register_script('register-script', plugins_url('cell-user/js/register.js'), array('jquery'), '1.0', true);
+		wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
+		wp_localize_script( 'address', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+	}
+
+
+	function print_register_script() {
+		global $enqueue;
+		if ( ! $enqueue ){
+			return;		
+		}
+		wp_print_scripts('register-script');
+	}
+
+	function shortcode_output(){
 
 		if (isset($this->register_args['fields'])) {
 			$registration_field = $this->register_args['fields'];
@@ -65,18 +91,23 @@ class CellRegister {
 		}
 
 		if(!is_user_logged_in()){
+
+			// add addrees script
+			global $enqueue;
+			$enqueue = true;
+
 			ob_start();
 			include('views/custom-registration-form.php');
 			$register_form = ob_get_contents();
 			ob_end_clean();
 
-			echo $register_form;		
+			return $register_form;
 		} else {
 			return false;
 		}
 	}
 
-	public function process_frontend_registration() {
+	function process_frontend_registration() {
 		if ( empty($_POST) || !wp_verify_nonce($_POST['registration_nonce'],'frontend_registration') ) {
 			echo 'Sorry, your nonce did not verify.';
 			die();

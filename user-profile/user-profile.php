@@ -35,11 +35,11 @@ class CellProfile {
 		);
 		$this->admin_preset_meta = array('first_name','last_name','nickname','description','rich_editing','comment_shortcuts','admin_color','use_ssl','show_admin_bar_front','aim','yim','jabber');
 
-		// include style and scrip
-		add_action( 'template_redirect', array( $this, 'profile_script'));
-
 		// add a shortcode
 		add_shortcode('cell-user-profile', array( $this, 'shortcode_output'));
+
+		// add a redirect for logged out user
+		add_action('template_redirect', array( $this, 'redirect_user'));
 
 		// add login ajax handler function
 		add_action('wp_ajax_frontend_profile', array( $this, 'process_frontend_profile_fields'));
@@ -53,15 +53,20 @@ class CellProfile {
 		add_action( 'edit_user_profile_update', array( $this,'save_admin_extra_profile_fields' ));
 	}
 	
-	public function profile_script(){
-		if (is_page($this->profile_args['page'])){
-			wp_enqueue_script('profile-script', plugins_url().'/cell-user/js/profile.js', array('jquery'), '0.1', true);
-			wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
-			wp_localize_script( 'ajaxurl', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
-		}	
+	function redirect_user(){
+		if (isset($this->profile_args['page']) && is_page($this->profile_args['page']) && !is_user_logged_in()){
+			$result['type'] = 'error';
+			$result['message'] = __('Please login.', 'cell-user');
+			if (isset($this->profile_args['page-redirect'])) {
+				$return = get_permalink( get_page_by_path( $this->profile_args['page-redirect'] ) );
+			} else{
+				$return = get_bloginfo('url');
+			}
+			ajax_response($result,$return);
+		}
 	}
 
-	public function shortcode_output(){
+	function shortcode_output(){
 
 		if (isset($this->profile_args['fieldset'])) {
 			$profile_field = $this->profile_args['fieldset'];
@@ -75,13 +80,13 @@ class CellProfile {
 				$register_form = ob_get_contents();
 			ob_end_clean();
 
-			echo $register_form;		
+			return $register_form;		
 		} else {
 			return false;
 		}
 	}
 
-	public function process_frontend_profile_fields() {
+	function process_frontend_profile_fields() {
 
 		if (isset($this->profile_args['fieldset'])) {
 			$profile_field = $this->profile_args['fieldset'];
@@ -143,7 +148,7 @@ class CellProfile {
 		}
 	}
 
-	public function admin_extra_profile_fields(){
+	function admin_extra_profile_fields(){
 
 		if (isset($this->profile_args['fieldset'])) {
 			$profile_field = $this->profile_args['fieldset'];
@@ -154,7 +159,7 @@ class CellProfile {
 		include('views/admin-user-detail.php');
 	}
 
-	public function save_admin_extra_profile_fields( $user_id ) {
+	function save_admin_extra_profile_fields( $user_id ) {
 		if ( !current_user_can( 'edit_user', $user_id ) ){
 			return false;	
 		}
