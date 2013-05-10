@@ -29,12 +29,7 @@ class CellLogin {
 
 		// add reset password ajax handler function
 		add_action('wp_ajax_nopriv_frontend_reset_password', array($this, 'process_frontend_reset_password'));
-
-		// register script
-		add_action('init', array($this, 'cell_enqueue'));
-
-		// print script
-		add_action('wp_footer', array($this, 'print_login_script'));
+		
 	}
 	
 
@@ -55,27 +50,13 @@ class CellLogin {
 		}
 	}
 
-	function cell_enqueue() {
-		wp_register_script('login-script', plugins_url('cell-user/js/login.js'), array('jquery'), '1.0', true);
-		wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
-		wp_localize_script( 'address', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
-	}
-
-
-	function print_login_script() {
-		global $enqueue;
-		if ( ! $enqueue ){
-			return;		
-		}
-		wp_print_scripts('login-script');
-	}
-
 	function shortcode_output(){
 		if(!is_user_logged_in()){
 
 			// add addrees script
-			global $enqueue;
-			$enqueue = true;
+			wp_enqueue_script('login-script', plugins_url('cell-user/js/login.js'), array('jquery'), '1.0', true);
+			wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
+			wp_localize_script( 'address', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 
 			ob_start();
 				if (isset($_REQUEST['forgot-password']) && $_REQUEST['forgot-password']==1) {

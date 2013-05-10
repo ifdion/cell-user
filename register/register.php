@@ -47,11 +47,6 @@ class CellRegister {
 		// add login ajax handler function
 		add_action('wp_ajax_nopriv_frontend_registration', array( $this, 'process_frontend_registration'));
 
-		// register script
-		add_action('init', array($this, 'cell_enqueue'));
-
-		// print script
-		add_action('wp_footer', array($this, 'print_register_script'));
 	}
 
 	function redirect_user(){
@@ -67,21 +62,6 @@ class CellRegister {
 		}
 	}
 
-	function cell_enqueue() {
-		wp_register_script('register-script', plugins_url('cell-user/js/register.js'), array('jquery'), '1.0', true);
-		wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
-		wp_localize_script( 'address', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
-	}
-
-
-	function print_register_script() {
-		global $enqueue;
-		if ( ! $enqueue ){
-			return;		
-		}
-		wp_print_scripts('register-script');
-	}
-
 	function shortcode_output(){
 
 		if (isset($this->register_args['fields'])) {
@@ -93,8 +73,9 @@ class CellRegister {
 		if(!is_user_logged_in()){
 
 			// add addrees script
-			global $enqueue;
-			$enqueue = true;
+			wp_enqueue_script('register-script', plugins_url('cell-user/js/register.js'), array('jquery'), '1.0', true);
+			wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
+			wp_localize_script( 'address', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 
 			ob_start();
 			include('views/custom-registration-form.php');

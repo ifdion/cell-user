@@ -75,6 +75,12 @@ class CellProfile {
 		}
 
 		if(is_user_logged_in()){
+
+			// add addrees script
+			wp_enqueue_script('profile-script', plugins_url('cell-user/js/profile.js'), array('jquery'), '1.0', true);
+			wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
+			wp_localize_script( 'address', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+
 			ob_start();
 				include('views/custom-profile-form.php');
 				$register_form = ob_get_contents();
