@@ -6,7 +6,6 @@
 	 * TODO :
 	 * input option from tax_*
 	 * input option from cpt_*
-	 * input option from function
 	 * input type : textsuggest
 	 * input type : multiple select
 	 * input type : checkbox group
@@ -45,7 +44,14 @@
 	</fieldset>
 	<?php foreach ($profile_field as $key => $value): ?>
 		<?php if ($value['public'] == true): ?>
-			<fieldset id="<?php echo $key ?>">
+			<?php
+				if (isset($value['show-on'])){
+					$data_show_on = 'data-show-on="'. $value['show-on'] .'"';
+				} else {
+					$data_show_on = '';
+				}
+			?>
+			<fieldset id="<?php echo $key ?>" <?php echo $data_show_on ?>>
 				<legend><h4><?php echo $value['title'] ?></h4></legend>
 				<?php foreach ($value['fields'] as $field_key => $field_value): ?>
 					<?php
@@ -53,6 +59,19 @@
 							$current_value = $user_meta[$field_key][0];
 						} else {
 							$current_value = '';
+						}
+						// set additional class
+						$added_class = ' ';
+						if (isset($field_value['attr']['class'])) {
+							$added_class = ' '.$field_value['attr']['class'];
+							unset($field_value['attr']['class']);
+						}
+						// set additional attributes
+						$additional_attr = '';
+						if (isset($field_value['attr'])) {
+							foreach ($field_value['attr'] as $attr_key => $attr_value) {
+								$additional_attr .= ' '.$attr_key.'="'.$attr_value.'"';
+							}
 						}
 					?>
 					<?php
@@ -62,7 +81,7 @@
 									<div class="control-group">
 										<label class="control-label" for="<?php echo $field_key ?>"><?php echo $field_value['title'] ?></label>
 										<div class="controls">
-											<input type="text" class="input-xlarge " id="<?php echo $field_key ?>" name="<?php echo $field_key ?>" value="<?php echo $current_value ?>">
+											<input type="text" class="input-xlarge <?php echo $added_class ?>" id="<?php echo $field_key ?>" name="<?php echo $field_key ?>" value="<?php echo $current_value ?>" <?php echo $additional_attr ?>>
 										</div>
 									</div>
 								<?php
@@ -72,7 +91,7 @@
 									<div class="control-group">
 										<label class="control-label" for="<?php echo $field_key ?>"><?php echo $field_value['title'] ?></label>
 										<div class="controls">
-											<textarea type="checkbox" class="input-xlarge " id="<?php echo $field_key ?>" name="<?php echo $field_key ?>"><?php echo $current_value ?></textarea>
+											<textarea type="checkbox" class="input-xlarge <?php echo $added_class ?>" id="<?php echo $field_key ?>" name="<?php echo $field_key ?>" <?php echo $additional_attr ?>><?php echo $current_value ?></textarea>
 										</div>
 									</div>
 								<?php
@@ -82,7 +101,7 @@
 									<div class="control-group">
 										<div class="controls">
 											<label class="checkbox" for="<?php echo $field_key ?>">
-												<input type="checkbox" class="input-xlarge " id="<?php echo $field_key ?>" name="<?php echo $field_key ?>" value="1" <?php checked($current_value, 1) ?>>
+												<input type="checkbox" class="input-xlarge <?php echo $added_class ?>" id="<?php echo $field_key ?>" name="<?php echo $field_key ?>" value="1" <?php checked($current_value, 1) ?> <?php echo $additional_attr ?>>
 												<?php echo $field_value['title'] ?>
 											</label>
 										</div>
@@ -97,7 +116,7 @@
 											<?php if (isset($field_value['option'])): ?>
 												<?php foreach ($field_value['option'] as $option_value => $option_title): ?>
 													<label class="radio inline">
-														<input type="radio" id="<?php echo $field_key.'-'.$field_value['option'] ?>" value="<?php echo $option_value ?>" name="<?php echo $field_key ?>" <?php checked($current_value, $option_value) ?> > <?php echo $option_title ?>
+														<input type="radio" id="<?php echo $field_key.'-'.$field_value['option'] ?>" class="<?php echo $added_class ?>"value="<?php echo $option_value ?>" name="<?php echo $field_key ?>" <?php checked($current_value, $option_value) ?> <?php echo $additional_attr ?>> <?php echo $option_title ?>
 													</label>
 												<?php endforeach ?>
 											<?php else: ?>
@@ -113,8 +132,15 @@
 										<label class="control-label"><?php echo $field_value['title'] ?></label>
 										<div class="controls">
 											<?php if (isset($field_value['option'])): ?>
-												<select name="<?php echo $field_key ?>">
-													<?php foreach ($field_value['option'] as $option_value => $option_title): ?>
+												<?php
+													if (!is_array($field_value['option'])) {
+														$option = call_user_func_array($field_value['option'],array($current_user->ID));
+													} else {
+														$option = $field_value['option'];
+													}
+												?>
+												<select name="<?php echo $field_key ?>" class="<?php echo $added_class ?>" <?php echo $additional_attr ?>>
+													<?php foreach ($option as $option_value => $option_title): ?>
 														<option value="<?php echo $option_value ?>"  <?php selected($current_value, $option_value) ?> > <?php echo $option_title ?></option>
 													<?php endforeach ?>
 												</select>
