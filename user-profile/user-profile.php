@@ -48,6 +48,9 @@ class CellProfile {
 		add_action( 'show_user_profile', array( $this, 'admin_extra_profile_fields' ));
 		add_action( 'edit_user_profile', array( $this, 'admin_extra_profile_fields' ));
 
+		// admin script
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_admin_scripts' ) );
+
 		// saving admin profile field
 		add_action( 'personal_options_update', array( $this,'save_admin_extra_profile_fields' ));
 		add_action( 'edit_user_profile_update', array( $this,'save_admin_extra_profile_fields' ));
@@ -80,6 +83,16 @@ class CellProfile {
 			wp_enqueue_script('profile-script', plugins_url('cell-user/js/profile.js'), array('jquery'), '1.0', true);
 			wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
 			wp_localize_script( 'address', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+
+			if (isset($this->profile_args['include-script'])) {
+				if (is_array($this->profile_args['include-script'])) {
+					foreach ($this->profile_args['include-script'] as $value) {
+						wp_enqueue_script( $value );
+					}
+				} else {
+					wp_enqueue_script( $this->profile_args['include-script'] );
+				}
+			}
 
 			ob_start();
 				include('views/custom-profile-form.php');
@@ -142,6 +155,12 @@ class CellProfile {
 			}
 			// save each field
 			foreach ($user_fields as $field_key => $field_detail) {
+				// special way to save for checkbox
+				if (isset($_POST[$field_key]) && $field_detail['type'] == 'checkbox') {
+					update_user_meta( $_POST['user_id'], $field_key, $_POST[$field_key] );
+				} else {
+					delete_user_meta( $_POST['user_id'], $field_key);
+				}
 				if (isset($_POST[$field_key])) {
 					update_user_meta( $_POST['user_id'], $field_key, $_POST[$field_key] );
 				}
@@ -187,6 +206,29 @@ class CellProfile {
 		foreach ($user_fields as $field_key => $field_detail) {
 			if (isset($_POST[$field_key])) {
 				update_user_meta( $_POST['user_id'], $field_key, $_POST[$field_key] );
+			}
+			// special way to delete checkbox value
+			if (!isset($_POST[$field_key]) && $field_detail['type'] == 'checkbox') {
+				delete_user_meta( $_POST['user_id'], $field_key);
+			}
+		}
+	}
+
+	function register_admin_scripts() {
+
+		$screen = get_current_screen();
+		if ( $screen->base == 'profile' ) {
+			wp_enqueue_script('profile-script', plugins_url('cell-user/js/profile.js'), array('jquery'), '1.0', true);
+			wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
+			wp_localize_script( 'address', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+		}
+		if (isset($this->profile_args['include-script'])) {
+			if (is_array($this->profile_args['include-script'])) {
+				foreach ($this->profile_args['include-script'] as $value) {
+					wp_enqueue_script( $value );
+				}
+			} else {
+				wp_enqueue_script( $this->profile_args['include-script'] );
 			}
 		}
 	}
