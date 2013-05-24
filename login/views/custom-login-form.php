@@ -20,11 +20,44 @@
 		<div class="controls">
 			<input type="password" class="input-xlarge " id="password" name="password">
 		</div>
-		<p class="help-block"><a href="<?php echo $forgot_password_link ?>"><?php _e('Forgot Password ?', 'cell-user') ?></a></p>
 	</div>
+
+	<div class="control-group">
+		<!-- <label class="control-label" for="password"><?php _e('Password', 'cell-user') ?></label> -->
+		<div class="controls">
+			<!-- <input type="password" class="input-xlarge " id="password" name="password"> -->
+			<p class="help-block"><a href="<?php echo $forgot_password_link ?>"><?php _e('Forgot Password ?', 'cell-user') ?></a></p>
+		</div>
+		
+	</div>
+
+
 	<div class="form-actions">
 		<button type="submit" class="btn btn-primary"><?php _e('Login', 'cell-user') ?></button>
 		<?php wp_nonce_field('frontend_login','login_nonce'); ?>
 		<input  name="action" value="frontend_login" type="hidden">
 	</div>
 </form>
+
+<!-- <form class="form-horizontal">
+  <div class="control-group">
+    <label class="control-label" for="inputEmail">Email</label>
+    <div class="controls">
+      <input type="text" id="inputEmail" placeholder="Email">
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="inputPassword">Password</label>
+    <div class="controls">
+      <input type="password" id="inputPassword" placeholder="Password">
+    </div>
+  </div>
+  <div class="control-group">
+    <div class="controls">
+      <label class="checkbox">
+        <input type="checkbox"> Remember me
+      </label>
+      <button type="submit" class="btn">Sign in</button>
+    </div>
+  </div>
+</form> -->
