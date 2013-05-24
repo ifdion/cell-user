@@ -98,17 +98,8 @@
 							break;
 							case 'checkbox':
 								?>
-			<div class="control-group">
-              <div class="controls">
-                <label class="checkbox">
-                  <input type="checkbox"> Remember me
-                </label>
-                <button type="submit" class="btn">Sign in</button>
-              </div>
-            </div>
 									<div class="control-group">
 										<div class="controls">
-
 											<label class="checkbox" for="<?php echo $field_key ?>">
 												<input type="checkbox" class="<?php echo $added_class ?>" id="<?php echo $field_key ?>" name="<?php echo $field_key ?>" value="1" <?php checked($current_value, 1) ?> <?php echo $additional_attr ?>>
 												<?php echo $field_value['title'] ?>
