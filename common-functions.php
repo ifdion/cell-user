@@ -116,20 +116,20 @@ if (!function_exists('attach_uploads')) {
 /* wp-admin : disable non administrator to access wp-admin
 ---------------------------------------------------------------
 */
-function my_admin_init(){
+function cell_user_admin_init(){
 	if( !defined('DOING_AJAX') && !current_user_can('administrator') ){
 		wp_redirect( home_url() );
 		exit();
 	}
 }
-add_action('admin_init','my_admin_init');
+add_action('admin_init','cell_user_admin_init');
 
 
 /* wp-admin : add script in wp-admin 
 ---------------------------------------------------------------
 */
-add_action('admin_print_scripts', 'add_script'); //dion
-function add_script() { //dion
+add_action('admin_print_scripts', 'cell_user_add_script'); //dion
+function cell_user_add_script() { //dion
 	wp_enqueue_script( 'suggest' );
 	wp_enqueue_script('admin-cellscript', plugins_url() . '/twitgreen/js/twitgreen-admin-script.js', array('jquery'),'1.0',true);
 
