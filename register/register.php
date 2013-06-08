@@ -7,6 +7,8 @@
  * @author Dion
  **/
 
+
+
 class CellRegister {
 
 	function __construct($args) {
@@ -34,9 +36,6 @@ class CellRegister {
 			)
 		);
 
-		if (isset($this->register_args['create-blog']) && $this->register_args['create-blog'] == 1) {
-			// create blog
-		}
 
 		// add a shortcode
 		add_shortcode('cell-user-register', array( $this, 'shortcode_output'));
@@ -127,6 +126,32 @@ class CellRegister {
 					'role' => get_option('default_role')
 				);
 				$user_id = wp_insert_user( $user_registration_data );
+
+				// create blog
+				if (isset($this->register_args['create-blog']) && $this->register_args['create-blog'] == TRUE) {
+					$domain = home_url();
+					$domain = str_replace('https://', '', $domain);
+					$domain = str_replace('http://', '', $domain);
+					$path = '/'.$username.'/';
+
+					// create blog
+					$blog_id = wpmu_create_blog( $domain, $path, $username, $user_id,array('public'=>0),1);
+
+					// step by step
+					// $blog_id = insert_blog( $domain, $path, 1 );
+					// switch_to_blog($blog_id);
+					// install_blog($blog_id, $username);
+					// wp_install_defaults($user_id);
+					// add_user_to_blog($blog_id, $user_id, 'administrator');
+					// add_option( 'WPLANG', get_site_option( 'WPLANG' ) );
+					// update_option( 'blog_public', 0 );
+					// restore_current_blog();
+					// flush_rewrite_rules();
+
+					// do_action( 'wpmu_new_blog', $blog_id, $user_id, $domain, $path, 1, '' );					
+				}
+
+				// notification
 				$notifcation = wp_new_user_notification($user_id, $password);
 				$login = wp_signon( array( 'user_login' => $username, 'user_password' => $password, 'remember' => false ), false );
 
@@ -134,7 +159,7 @@ class CellRegister {
 
 				// registration result
 				$success['type'] = 'success';
-				$success['message'] = __('Registration Success.', 'cell-user');
+				$success['message'] = __('Registration Success.'.$blog_id, 'cell-user');
 				ajax_response($success,$return);
 				
 			}		
