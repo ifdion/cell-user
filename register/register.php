@@ -46,6 +46,9 @@ class CellRegister {
 		// add login ajax handler function
 		add_action('wp_ajax_nopriv_frontend_registration', array( $this, 'process_frontend_registration'));
 
+		// flush rewrite on registration
+		add_action( 'wp_loaded', array($this, 'registration_flush_rewrite'));
+
 	}
 
 	function redirect_user(){
@@ -88,6 +91,7 @@ class CellRegister {
 	}
 
 	function process_frontend_registration() {
+
 		if ( empty($_POST) || !wp_verify_nonce($_POST['registration_nonce'],'frontend_registration') ) {
 			echo 'Sorry, your nonce did not verify.';
 			die();
@@ -126,6 +130,7 @@ class CellRegister {
 					'role' => get_option('default_role')
 				);
 				$user_id = wp_insert_user( $user_registration_data );
+				$return = add_query_arg(array('new'=>1), get_bloginfo('url'));
 
 				// create blog
 				if (isset($this->register_args['create-blog']) && $this->register_args['create-blog'] == TRUE) {
@@ -134,28 +139,25 @@ class CellRegister {
 					$domain = str_replace('http://', '', $domain);
 					$path = '/'.$username.'/';
 
+					$blog_option = $this->register_args['blog-options'];
+
 					// create blog
-					$blog_id = wpmu_create_blog( $domain, $path, $username, $user_id,array('public'=>0),1);
+					$blog_id = wpmu_create_blog( $domain, $path, $username, $user_id,$blog_option,1);
+					switch_to_blog( $blog_id );
 
-					// step by step
-					// $blog_id = insert_blog( $domain, $path, 1 );
-					// switch_to_blog($blog_id);
-					// install_blog($blog_id, $username);
-					// wp_install_defaults($user_id);
-					// add_user_to_blog($blog_id, $user_id, 'administrator');
-					// add_option( 'WPLANG', get_site_option( 'WPLANG' ) );
-					// update_option( 'blog_public', 0 );
-					// restore_current_blog();
-					// flush_rewrite_rules();
+					$return = add_query_arg(array('new'=>'1'), get_bloginfo('url'));
 
-					// do_action( 'wpmu_new_blog', $blog_id, $user_id, $domain, $path, 1, '' );					
+					// register blog hook
+					do_action( 'cell-blog-register' );
+			
 				}
 
 				// notification
 				$notifcation = wp_new_user_notification($user_id, $password);
 				$login = wp_signon( array( 'user_login' => $username, 'user_password' => $password, 'remember' => false ), false );
 
-				$return = get_bloginfo('url');
+				// register hook
+				do_action( 'cell-register' );
 
 				// registration result
 				$success['type'] = 'success';
@@ -165,6 +167,13 @@ class CellRegister {
 			}		
 			die();
 		}
+	}
+
+	function registration_flush_rewrite() {
+		if (isset($_REQUEST['new'])) {
+			flush_rewrite_rules();
+		}
+
 	}
 
 }
