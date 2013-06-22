@@ -38,11 +38,17 @@ class CellLogin {
 	*/
 
 	function redirect_user(){
+		global $current_user;
 		if (isset($this->login_args['page']) && is_page($this->login_args['page']) && is_user_logged_in()){
 			$result['type'] = 'notice';
 			$result['message'] = __('You are logged in.', 'cell-user');
-			if (isset($this->login_args['page-redirect'])) {
-				$return = get_permalink( get_page_by_path( $this->login_args['page-redirect'] ) );
+			if (isset($this->login_args['redirect-noaccess'])) {
+				if (is_page( $this->login_args['redirect-noaccess'] )) {
+					$return = get_permalink( get_page_by_path( $this->login_args['redirect-noaccess'] ) );
+				} else {
+					$return = call_user_func_array( $this->login_args['redirect-noaccess'] , $current_user->user_name);
+				}
+				$return = get_permalink( get_page_by_path( $this->login_args['redirect-noaccess'] ) );
 			} else{
 				$return = get_bloginfo('url');
 			}
@@ -76,7 +82,6 @@ class CellLogin {
 	}
 
 	function process_login() {
-
 		if ( empty($_POST) || !wp_verify_nonce($_POST['login_nonce'],'frontend_login') ) {
 			echo 'Sorry, your nonce did not verify.';
 			die();
@@ -85,6 +90,17 @@ class CellLogin {
 			$username = $_POST['username'];
 			$password = $_POST['password'];
 			$return = $_POST['_wp_http_referer'];
+
+
+			if (isset($this->login_args['redirect-noaccess'])) {
+				if (is_page( $this->login_args['redirect-noaccess'] )) {
+					$return = get_permalink( get_page_by_path( $this->login_args['redirect-noaccess'] ) );
+				} else {
+					$return = call_user_func_array( $this->login_args['redirect-noaccess'] , array($username));
+				}
+			} else {
+				$return = get_bloginfo('url');
+			}
 
 			if ($username == "" || $password == "") {
 				$result['type'] = 'error';
@@ -101,7 +117,6 @@ class CellLogin {
 				} else {
 					$result['type'] = 'success';
 					$result['message'] = __('Login Success.', 'cell-user');
-					$return = get_bloginfo( 'url' );
 					ajax_response($result,$return);
 				}
 			} elseif (username_exists($username)) {
@@ -113,14 +128,12 @@ class CellLogin {
 				} else {
 					$result['type'] = 'success';
 					$result['message'] = __('Login Success.', 'cell-user');
-					$return = get_bloginfo( 'url' );
 					ajax_response($result,$return);
 				}
 			} else {
 				$result['type'] = 'error';
 				$result['message'] = __('Login error, please check your username and password.', 'cell-user');
 				ajax_response($result,$return);
-
 			}
 		}
 	}
