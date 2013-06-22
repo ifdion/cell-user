@@ -55,8 +55,8 @@ class CellRegister {
 		if (isset($this->register_args['page']) && is_page($this->register_args['page']) && is_user_logged_in()){
 			$result['type'] = 'notice';
 			$result['message'] = __('You are logged in.', 'cell-user');
-			if (isset($this->register_args['page-redirect'])) {
-				$return = get_permalink( get_page_by_path( $this->register_args['page-redirect'] ) );
+			if (isset($this->register_args['redirect-noaccess'])) {
+				$return = get_permalink( get_page_by_path( $this->register_args['redirect-noaccess'] ) );
 			} else{
 				$return = get_bloginfo('url');
 			}

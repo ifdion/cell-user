@@ -60,8 +60,8 @@ class CellProfile {
 		if (isset($this->profile_args['page']) && is_page($this->profile_args['page']) && !is_user_logged_in()){
 			$result['type'] = 'error';
 			$result['message'] = __('Please login.', 'cell-user');
-			if (isset($this->profile_args['page-redirect'])) {
-				$return = get_permalink( get_page_by_path( $this->profile_args['page-redirect'] ) );
+			if (isset($this->profile_args['redirect-noaccess'])) {
+				$return = get_permalink( get_page_by_path( $this->profile_args['redirect-noaccess'] ) );
 			} else{
 				$return = get_bloginfo('url');
 			}
