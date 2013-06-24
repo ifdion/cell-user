@@ -92,11 +92,11 @@ class CellLogin {
 			$return = $_POST['_wp_http_referer'];
 
 
-			if (isset($this->login_args['redirect-noaccess'])) {
-				if (is_page( $this->login_args['redirect-noaccess'] )) {
-					$return = get_permalink( get_page_by_path( $this->login_args['redirect-noaccess'] ) );
+			if (isset($this->login_args['redirect-success'])) {
+				if (is_page( $this->login_args['redirect-success'] )) {
+					$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
 				} else {
-					$return = call_user_func_array( $this->login_args['redirect-noaccess'] , array($username));
+					$return = call_user_func_array( $this->login_args['redirect-success'] , array($username));
 				}
 			} else {
 				$return = get_bloginfo('url');
