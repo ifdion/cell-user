@@ -46,6 +46,11 @@ class CellRegister {
 		// add login ajax handler function
 		add_action('wp_ajax_nopriv_frontend_registration', array( $this, 'process_frontend_registration'));
 
+		// if this 
+		if (isset($this->register_args['captcha'])){
+			add_action('wp_ajax_nopriv_get_captcha_image', array( $this, 'get_captcha_image'));	
+		}		
+
 		// flush rewrite on registration
 		add_action( 'wp_loaded', array($this, 'registration_flush_rewrite'));
 
@@ -99,8 +104,20 @@ class CellRegister {
 			// validate data
 			$username = $_POST['username'];
 			$email = $_POST['email'];
-			$password = $_POST['password'];
+			$password = $_POST['password'];			
 			$return = $_POST['_wp_http_referer'];
+
+			if (isset($_POST['captcha'])) {
+				$captcha = $_POST['captcha'];
+			}
+
+			if (isset($this->register_args['captcha']) && ( $captcha == $_SESSION['cap_code'] )) {
+				// do nothing
+			} else {
+				$error['type'] = 'error';
+				$error['message'] = __('Invalid captcha.', 'cell-user');
+				ajax_response($error,$return);
+			}
 
 			if(preg_match('/^[a-z0-9_-]{3,15}$/i', $username) == 0){
 				$error['type'] = 'error';
@@ -161,7 +178,7 @@ class CellRegister {
 
 				// registration result
 				$success['type'] = 'success';
-				$success['message'] = __('Registration Success.'.$blog_id, 'cell-user');
+				$success['message'] = __('Registration Success.', 'cell-user');
 				ajax_response($success,$return);
 				
 			}		
@@ -169,11 +186,30 @@ class CellRegister {
 		}
 	}
 
+	function get_captcha_image() {
+		$random_string = wp_generate_password( 6, FALSE, FALSE);
+		$_SESSION['cap_code'] = $random_string;
+
+		if (isset($this->register_args['captcha-image'])) {
+			$image_bg = $this->register_args['captcha-image'];
+		} else {
+			$image_bg = CELL_USER_PATH .'img/cap_bg.jpg';
+		}
+
+		$newImage = imagecreatefromjpeg( $image_bg );
+		$txtColor = imagecolorallocate($newImage, 255, 255, 255);
+		$txtColor = imagecolorallocate($newImage, 0, 0, 0);
+		imagestring($newImage, 5, 5, 5, $random_string, $txtColor);
+		header("Content-type: image/jpeg");
+		imagejpeg($newImage);
+
+		die();
+	}
+
 	function registration_flush_rewrite() {
 		if (isset($_REQUEST['new'])) {
 			flush_rewrite_rules();
 		}
-
 	}
 
 }

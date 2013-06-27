@@ -28,6 +28,16 @@
 				</div>
 			</div>
 		<?php endforeach ?>
+		<?php if (isset($this->register_args['captcha'])) :?>
+		<div class="control-group">
+			<label class="control-label" for="input01"><?php _e( 'Retype this Letters', 'cell-user' ) ?></label>
+			<div id="" class="controls">
+				<p><img style=""src="<?php echo admin_url( 'admin-ajax.php') ?>?action=get_captcha_image "> <a href=""><?php _e( 'Reload Captcha','cell-user' ) ?></a></p>
+				<input type="text" class="input-xlarge <?php echo $required['class'] ?>" id="captcha" name="captcha" />
+			</div>
+		</div>
+
+		<?php endif	?>
 		<div class="form-actions">
 			<button type="submit" class="btn btn-primary"><?php _e('Register', 'cell-user') ?></button>
 			<?php wp_nonce_field('frontend_registration','registration_nonce'); ?>
