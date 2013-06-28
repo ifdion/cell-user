@@ -89,7 +89,7 @@ class CellLogin {
 			// validate data
 			$username = $_POST['username'];
 			$password = $_POST['password'];
-			$return = $_POST['_wp_http_referer'];
+			$return_error = $_POST['_wp_http_referer'];
 
 
 			if (isset($this->login_args['redirect-success'])) {
@@ -105,7 +105,7 @@ class CellLogin {
 			if ($username == "" || $password == "") {
 				$result['type'] = 'error';
 				$result['message'] = __('Field empty.', 'cell-user');
-				ajax_response($result,$return);
+				ajax_response($result,$return_error);
 
 			} elseif (email_exists($username)) {
 				$user = get_user_by('email', $username);
@@ -113,7 +113,7 @@ class CellLogin {
 				if (is_wp_error($login)) {
 					$result['type'] = 'error';
 					$result['message'] = __('Login error, please check your username and password.', 'cell-user');
-					ajax_response($result,$return);
+					ajax_response($result,$return_error);
 				} else {
 					$result['type'] = 'success';
 					$result['message'] = __('Login Success.', 'cell-user');
@@ -124,7 +124,7 @@ class CellLogin {
 				if (is_wp_error($login)) {
 					$result['type'] = 'error';
 					$result['message'] = __('Login error, please check your username and password.', 'cell-user');
-					ajax_response($result,$return);
+					ajax_response($result,$return_error);
 				} else {
 					$result['type'] = 'success';
 					$result['message'] = __('Login Success.', 'cell-user');
@@ -133,7 +133,7 @@ class CellLogin {
 			} else {
 				$result['type'] = 'error';
 				$result['message'] = __('Login error, please check your username and password.', 'cell-user');
-				ajax_response($result,$return);
+				ajax_response($result,$return_error);
 			}
 		}
 	}
