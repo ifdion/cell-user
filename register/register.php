@@ -147,7 +147,13 @@ class CellRegister {
 					'role' => get_option('default_role')
 				);
 				$user_id = wp_insert_user( $user_registration_data );
-				$return = add_query_arg(array('new'=>1), get_bloginfo('url'));
+				
+
+				if (isset($this->register_args['redirect-success'])) {
+					$return = get_permalink( get_page_by_path( $this->register_args['redirect-success'] ) );
+				} else {
+					$return = add_query_arg(array('new'=>1), get_bloginfo('url'));
+				}
 
 				// create blog
 				if (isset($this->register_args['create-blog']) && $this->register_args['create-blog'] == TRUE) {
@@ -162,7 +168,11 @@ class CellRegister {
 					$blog_id = wpmu_create_blog( $domain, $path, $username, $user_id,$blog_option,1);
 					switch_to_blog( $blog_id );
 
-					$return = add_query_arg(array('new'=>'1'), get_bloginfo('url'));
+					if (isset($this->register_args['redirect-success'])) {
+						$return = get_permalink( get_page_by_path( $this->register_args['redirect-success'] ) );
+					} else {
+						$return = add_query_arg(array('new'=>'1'), get_bloginfo('url'));
+					}
 
 					// register blog hook
 					do_action( 'cell-blog-register' );
