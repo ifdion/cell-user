@@ -41,7 +41,7 @@ class CellRegister {
 		add_shortcode('cell-user-register', array( $this, 'shortcode_output'));
 
 		// add a redirect for logged out user
-		add_action('template_redirect', array( $this, 'redirect_user'));
+		// add_action('template_redirect', array( $this, 'redirect_user'));
 
 		// add login ajax handler function
 		add_action('wp_ajax_nopriv_frontend_registration', array( $this, 'process_frontend_registration'));
@@ -56,18 +56,18 @@ class CellRegister {
 
 	}
 
-	function redirect_user(){
-		if (isset($this->register_args['page']) && is_page($this->register_args['page']) && is_user_logged_in()){
-			$result['type'] = 'notice';
-			$result['message'] = __('You are logged in.', 'cell-user');
-			if (isset($this->register_args['redirect-noaccess'])) {
-				$return = get_permalink( get_page_by_path( $this->register_args['redirect-noaccess'] ) );
-			} else{
-				$return = get_bloginfo('url');
-			}
-			ajax_response($result,$return);
-		}
-	}
+	// function redirect_user(){
+	// 	if (isset($this->register_args['page']) && is_page($this->register_args['page']) && is_user_logged_in()){
+	// 		$result['type'] = 'notice';
+	// 		$result['message'] = __('You are logged in.', 'cell-user');
+	// 		if (isset($this->register_args['redirect-noaccess'])) {
+	// 			$return = get_permalink( get_page_by_path( $this->register_args['redirect-noaccess'] ) );
+	// 		} else{
+	// 			$return = get_bloginfo('url');
+	// 		}
+	// 		ajax_response($result,$return);
+	// 	}
+	// }
 
 	function shortcode_output(){
 
@@ -107,16 +107,15 @@ class CellRegister {
 			$password = $_POST['password'];			
 			$return = $_POST['_wp_http_referer'];
 
-			if (isset($_POST['captcha'])) {
+			if (isset($this->register_args['captcha'])) {
 				$captcha = $_POST['captcha'];
-			}
-
-			if (isset($this->register_args['captcha']) && ( $captcha == $_SESSION['cap_code'] )) {
-				// do nothing
-			} else {
-				$error['type'] = 'error';
-				$error['message'] = __('Invalid captcha.', 'cell-user');
-				ajax_response($error,$return);
+				if ($captcha == $_SESSION['cap_code']) {
+					
+				}  else {
+					$error['type'] = 'error';
+					$error['message'] = __('Invalid captcha.', 'cell-user');
+					ajax_response($error,$return);
+				}
 			}
 
 			if(preg_match('/^[a-z0-9_-]{3,15}$/i', $username) == 0){
@@ -140,6 +139,7 @@ class CellRegister {
 				ajax_response($error,$return);
 
 			} else {
+
 				$user_registration_data = array(
 					'user_login' => $username,
 					'user_pass' => $password,
@@ -157,6 +157,8 @@ class CellRegister {
 
 				// create blog
 				if (isset($this->register_args['create-blog']) && $this->register_args['create-blog'] == TRUE) {
+
+
 					$domain = home_url();
 					$domain = str_replace('https://', '', $domain);
 					$domain = str_replace('http://', '', $domain);
@@ -168,15 +170,16 @@ class CellRegister {
 					$blog_id = wpmu_create_blog( $domain, $path, $username, $user_id,$blog_option,1);
 					switch_to_blog( $blog_id );
 
+					// register blog hook
+					do_action( 'cell-blog-register' );
+
 					if (isset($this->register_args['redirect-success'])) {
 						$return = get_permalink( get_page_by_path( $this->register_args['redirect-success'] ) );
+						$return = add_query_arg(array('new'=>'1'), $return);
 					} else {
 						$return = add_query_arg(array('new'=>'1'), get_bloginfo('url'));
 					}
-
-					// register blog hook
-					do_action( 'cell-blog-register' );
-			
+		
 				}
 
 				// notification
@@ -191,7 +194,7 @@ class CellRegister {
 				$success['message'] = __('Registration Success.', 'cell-user');
 				ajax_response($success,$return);
 				
-			}		
+			}
 			die();
 		}
 	}
