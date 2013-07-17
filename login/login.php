@@ -91,16 +91,8 @@ class CellLogin {
 			$password = $_POST['password'];
 			$return_error = $_POST['_wp_http_referer'];
 
+			$return = get_bloginfo('url');
 
-			if (isset($this->login_args['redirect-success'])) {
-				if (is_page( $this->login_args['redirect-success'] )) {
-					$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
-				} else {
-					$return = call_user_func_array( $this->login_args['redirect-success'] , array($username));
-				}
-			} else {
-				$return = get_bloginfo('url');
-			}
 
 			if ($username == "" || $password == "") {
 				$result['type'] = 'error';
@@ -108,7 +100,17 @@ class CellLogin {
 				ajax_response($result,$return_error);
 
 			} elseif (email_exists($username)) {
+
 				$user = get_user_by('email', $username);
+				// get return from user data
+				if (isset($this->login_args['redirect-success'])) {
+					if (is_page( $this->login_args['redirect-success'] )) {
+						$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
+					} else {
+						$return = call_user_func_array( $this->login_args['redirect-success'] , array($user->ID));
+					}
+				}
+
 				$login = wp_signon( array( 'user_login' => $user->user_login, 'user_password' => $password, 'remember' => false ), false );
 				if (is_wp_error($login)) {
 					$result['type'] = 'error';
@@ -120,6 +122,17 @@ class CellLogin {
 					ajax_response($result,$return);
 				}
 			} elseif (username_exists($username)) {
+
+				$user = get_user_by('login', $username);
+				// get return from user data
+				if (isset($this->login_args['redirect-success'])) {
+					if (is_page( $this->login_args['redirect-success'] )) {
+						$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
+					} else {
+						$return = call_user_func_array( $this->login_args['redirect-success'] , array($user->ID));
+					}
+				}
+
 				$login = wp_signon( array( 'user_login' => $username, 'user_password' => $password, 'remember' => false ), false );
 				if (is_wp_error($login)) {
 					$result['type'] = 'error';
