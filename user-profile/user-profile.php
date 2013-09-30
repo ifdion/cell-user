@@ -166,6 +166,8 @@ class CellProfile {
 				}
 			}
 
+			do_action( 'after_ajax_frontend_profile', $user_fields);
+
 
 			$result['type'] = 'success';
 			$result['message'] = __('Profile updated.', 'cell-user');
