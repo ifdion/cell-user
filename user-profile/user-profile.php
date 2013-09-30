@@ -166,7 +166,7 @@ class CellProfile {
 				}
 			}
 
-			do_action( 'after_ajax_frontend_profile', $user_fields);
+			do_action( 'after_ajax_frontend_profile', $_POST);
 
 
 			$result['type'] = 'success';
