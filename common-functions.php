@@ -56,7 +56,7 @@ if (!function_exists('the_global_message')) {
 			foreach ($global_message as $message){
 				?>
 					<div id="" class="alert alert-<?php echo $message['type'] ?>">
-						<a href="" class="delete">✕</a> <span><?php echo $message['message'] ?></span>
+						<button type="button" class="close" data-dismiss="alert">×</button> <span><?php echo $message['message'] ?></span>
 					</div>
 				<?php
 			}
