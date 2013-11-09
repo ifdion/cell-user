@@ -168,6 +168,11 @@ class CellRegister {
 
 					// create blog
 					$blog_id = wpmu_create_blog( $domain, $path, $username, $user_id,$blog_option,1);
+
+					// add user to main blog
+					$main_blog = add_user_to_blog( 1, $user_id, 'subscriber' );
+
+					// switch blog
 					switch_to_blog( $blog_id );
 
 					// register blog hook
@@ -183,7 +188,7 @@ class CellRegister {
 				}
 
 				// notification
-				$notifcation = wp_new_user_notification($user_id, $password);
+				$notification = wp_new_user_notification($user_id, $password);
 				$login = wp_signon( array( 'user_login' => $username, 'user_password' => $password, 'remember' => false ), false );
 
 				// register hook
