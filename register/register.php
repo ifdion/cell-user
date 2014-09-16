@@ -151,6 +151,12 @@ class CellRegister {
 					'user_email' => $email,
 					'role' => get_option('default_role')
 				);
+
+				// check if user_url is submitted
+				if (isset($_POST['user_url']) && $_POST['user_url'] != '') {
+					$user_registration_data['user_url'] = $_POST['user_url'];
+				}
+
 				$user_id = wp_insert_user( $user_registration_data );
 				
 
@@ -190,6 +196,14 @@ class CellRegister {
 						$return = add_query_arg(array('new'=>'1'), get_bloginfo('url'));
 					}
 		
+				}
+
+				// save other attributes as usermeta
+				$default_field_key = array('username','email','password','registration_nonce','_wp_http_referer', 'action');
+				foreach ($_POST as $field_key => $field_value) {
+					if (!in_array($field_key, $default_field_key)) {
+						add_user_meta( $user_id, $field_key, $_POST[$field_key], TRUE );
+					}
 				}
 
 				// notification
