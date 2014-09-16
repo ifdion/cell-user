@@ -102,7 +102,12 @@ class CellRegister {
 			die();
 		} else {
 			// validate data
-			$username = $_POST['username'];
+			if (isset($_POST['username'])) {
+				$username = $_POST['username'];
+			} else {
+				$username_array =  explode('@', $_POST['email']);
+				$username = $username_array[0];
+			}
 			$email = $_POST['email'];
 			$password = $_POST['password'];			
 			$return = $_POST['_wp_http_referer'];
@@ -118,7 +123,7 @@ class CellRegister {
 				}
 			}
 
-			if(preg_match('/^[a-z0-9_-]{3,15}$/i', $username) == 0){
+			if(preg_match('/^[.@a-z0-9_-]{3,15}$/i', $username) == 0){
 				$error['type'] = 'error';
 				$error['message'] = __('Username not valid.', 'cell-user');
 				ajax_response($error,$return);
