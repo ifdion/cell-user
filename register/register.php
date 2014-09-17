@@ -41,7 +41,7 @@ class CellRegister {
 		add_shortcode('cell-user-register', array( $this, 'shortcode_output'));
 
 		// add a redirect for logged out user
-		// add_action('template_redirect', array( $this, 'redirect_user'));
+		add_action('template_redirect', array( $this, 'redirect_user'));
 
 		// add login ajax handler function
 		add_action('wp_ajax_nopriv_frontend_registration', array( $this, 'process_frontend_registration'));
@@ -56,18 +56,18 @@ class CellRegister {
 
 	}
 
-	// function redirect_user(){
-	// 	if (isset($this->register_args['page']) && is_page($this->register_args['page']) && is_user_logged_in()){
-	// 		$result['type'] = 'notice';
-	// 		$result['message'] = __('You are logged in.', 'cell-user');
-	// 		if (isset($this->register_args['redirect-noaccess'])) {
-	// 			$return = get_permalink( get_page_by_path( $this->register_args['redirect-noaccess'] ) );
-	// 		} else{
-	// 			$return = get_bloginfo('url');
-	// 		}
-	// 		ajax_response($result,$return);
-	// 	}
-	// }
+	function redirect_user(){
+		if (isset($this->register_args['page']) && is_page($this->register_args['page']) && is_user_logged_in()){
+			$result['type'] = 'warning';
+			$result['message'] = __('You are logged in.', 'cell-user');
+			if (isset($this->register_args['redirect-noaccess'])) {
+				$return = get_permalink( get_page_by_path( $this->register_args['redirect-noaccess'] ) );
+			} else{
+				$return = get_bloginfo('url');
+			}
+			ajax_response($result,$return);
+		}
+	}
 
 	function shortcode_output(){
 

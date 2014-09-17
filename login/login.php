@@ -19,7 +19,7 @@ class CellLogin {
 		add_shortcode('cell-user-login', array( $this, 'shortcode_output'));
 
 		// add a redirect for logged out user
-		// add_action('template_redirect', array( $this, 'redirect_user'));
+		add_action('template_redirect', array( $this, 'redirect_user'));
 
 		// add login ajax handler function
 		add_action('wp_ajax_nopriv_frontend_login', array( $this, 'process_login'));
@@ -37,24 +37,24 @@ class CellLogin {
 	---------------------------------------------------------------
 	*/
 
-	// function redirect_user(){
-	// 	global $current_user;
-	// 	if (isset($this->login_args['page']) && is_page($this->login_args['page']) && is_user_logged_in()){
-	// 		$result['type'] = 'notice';
-	// 		$result['message'] = __('You are logged in.', 'cell-user');
-	// 		if (isset($this->login_args['redirect-success'])) {
-	// 			if (is_page( $this->login_args['redirect-success'] )) {
-	// 				$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
-	// 			} else {
-	// 				$return = call_user_func_array( $this->login_args['redirect-success'] , $current_user->user_name);
-	// 			}
-	// 			$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
-	// 		} else{
-	// 			$return = get_bloginfo('url');
-	// 		}
-	// 		ajax_response($result,$return);
-	// 	}
-	// }
+	function redirect_user(){
+		global $current_user;
+		if (isset($this->login_args['page']) && is_page($this->login_args['page']) && is_user_logged_in()){
+			$result['type'] = 'warning';
+			$result['message'] = __('You are logged in.', 'cell-user');
+			if (isset($this->login_args['redirect-success'])) {
+				if (is_page( $this->login_args['redirect-success'] )) {
+					$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
+				} else {
+					$return = call_user_func_array( $this->login_args['redirect-success'] , $current_user->user_name);
+				}
+				$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
+			} else{
+				$return = get_bloginfo('url');
+			}
+			ajax_response($result,$return);
+		}
+	}
 
 	function shortcode_output(){
 		if(!is_user_logged_in()){
