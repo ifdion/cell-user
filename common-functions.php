@@ -50,12 +50,12 @@ if (!function_exists('setup_global_message')) {
 }
 
 if (!function_exists('the_global_message')) {
-	function the_global_message(){
+	function the_global_message($class){
 		global $global_message;
 		if ($global_message != '' && (count($global_message) > 0)) {
 			foreach ($global_message as $message){
 				?>
-					<div id="" class="alert alert-<?php echo $message['type'] ?>">
+					<div id="" class="alert alert-<?php echo $message['type'] .' '. $class ?>">
 						<button type="button" class="close" data-dismiss="alert">×</button> <span><?php echo $message['message'] ?></span>
 					</div>
 				<?php
