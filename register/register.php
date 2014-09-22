@@ -123,7 +123,8 @@ class CellRegister {
 				}
 			}
 
-			if(preg_match('/^[.@a-z0-9_-]{3,15}$/i', $username) == 0){
+			// if(preg_match('/^[.@a-z0-9_-]{3,25}$/i', $username) == 0){
+			if(preg_match('/^[.@a-z0-9_-]$/i', $username) == 0){
 				$error['type'] = 'error';
 				$error['message'] = __('Username not valid.', 'cell-user');
 				ajax_response($error,$return);
