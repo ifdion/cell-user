@@ -119,20 +119,27 @@ class CellProfile {
 		} else {
 
 			// set return value
-			$return = $_POST['_wp_http_referer'];
+			if (isset($this->profile_args['redirect-success'])) {
+				$return = get_permalink( get_page_by_path($this->profile_args['redirect-success']));
+			} else {
+				$return = $_POST['_wp_http_referer'];	
+			}
 
 			// save new email & password, if exist
-			if ($_POST['user_email'] != $_POST['user_email_old'] && is_email( $_POST['user_email'] )) {
-				if (email_exists( $_POST['user_email'] )) {
-					$result['type'] = 'error';
-					$result['message'] = __('Email already used.', 'cell-user');
-					ajax_response($result,$return);
+			if (isset($_POST['user_email']) && isset($_POST['user_email_old'])) {
+				if ($_POST['user_email'] != $_POST['user_email_old'] && is_email( $_POST['user_email'] )) {
+					if (email_exists( $_POST['user_email'] )) {
+						$result['type'] = 'error';
+						$result['message'] = __('Email already used.', 'cell-user');
+						ajax_response($result,$return);
+					}
+					$userdata['user_email'] = $_POST['user_email'];
+					$userdata['ID'] = $_POST['user_id'];
+					$update_user = true;
 				}
-				$userdata['user_email'] = $_POST['user_email'];
-				$userdata['ID'] = $_POST['user_id'];
-				$update_user = true;
 			}
-			if ($_POST['user_password'] != '') {
+
+			if (isset($_POST['user_passwors']) && $_POST['user_password'] != '') {
 				if ($_POST['user_password'] != $_POST['user_password_retype']) {
 					$result['type'] = 'error';
 					$result['message'] = __('Password did not match.', 'cell-user');
