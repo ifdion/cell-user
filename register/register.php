@@ -123,12 +123,13 @@ class CellRegister {
 			}
 
 			// if(preg_match('/^[.@a-z0-9_-]{3,25}$/i', $username) == 0){
-			if(preg_match('/^[.@a-z0-9_-]$/i', $username) == 0){
-				// $error['type'] = 'error';
-				// $error['message'] = __('Username not valid.', 'cell-user');
-				// ajax_response($error,$return);
+			// if(preg_match('/^[.@a-z0-9_-]$/i', $username) == 0){
+			// 	$error['type'] = 'error';
+			// 	$error['message'] = __('Username not valid.', 'cell-user');
+			// 	ajax_response($error,$return);
 
-			} elseif(!is_email($email))	{
+			// } elseif(!is_email($email))	{
+			if(!is_email($email))	{
 				$error['type'] = 'error';
 				$error['message'] = __('Email not valid.', 'cell-user');
 				ajax_response($error,$return);
