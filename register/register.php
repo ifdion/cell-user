@@ -105,8 +105,7 @@ class CellRegister {
 			if (isset($_POST['username'])) {
 				$username = $_POST['username'];
 			} else {
-				$username_array =  explode('@', $_POST['email']);
-				$username = $username_array[0];
+				$username = $_POST['email'];
 			}
 			$email = $_POST['email'];
 			$password = $_POST['password'];			
@@ -125,9 +124,9 @@ class CellRegister {
 
 			// if(preg_match('/^[.@a-z0-9_-]{3,25}$/i', $username) == 0){
 			if(preg_match('/^[.@a-z0-9_-]$/i', $username) == 0){
-				$error['type'] = 'error';
-				$error['message'] = __('Username not valid.', 'cell-user');
-				ajax_response($error,$return);
+				// $error['type'] = 'error';
+				// $error['message'] = __('Username not valid.', 'cell-user');
+				// ajax_response($error,$return);
 
 			} elseif(!is_email($email))	{
 				$error['type'] = 'error';
@@ -147,9 +146,9 @@ class CellRegister {
 			} else {
 
 				$user_registration_data = array(
-					'user_login' => $username,
+					'user_login' => sanitize_user($username),
 					'user_pass' => $password,
-					'user_email' => $email,
+					'user_email' => sanitize_email( $email ),
 					'role' => get_option('default_role')
 				);
 
