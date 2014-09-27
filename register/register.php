@@ -150,7 +150,8 @@ class CellRegister {
 					'user_login' => sanitize_user($username),
 					'user_pass' => $password,
 					'user_email' => sanitize_email( $email ),
-					'role' => get_option('default_role')
+					'role' => get_option('default_role'),
+					'display_name' => $username
 				);
 
 				// check if user_url is submitted
