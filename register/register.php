@@ -101,63 +101,80 @@ class CellRegister {
 			echo 'Sorry, your nonce did not verify.';
 			die();
 		} else {
+
+			$registration_data = $_POST;
+
 			// validate data
-			if (isset($_POST['username'])) {
-				$username = $_POST['username'];
+			if (isset($registration_data['username'])) {
+				$registration_data['username'] = $registration_data['username'];
 			} else {
-				$username = $_POST['email'];
+				$registration_data['username'] = $registration_data['email'];
 			}
-			$email = $_POST['email'];
-			$password = $_POST['password'];			
-			$return = $_POST['_wp_http_referer'];
+			$registration_data['email'] = $registration_data['email'];
+			$registration_data['password'] = $registration_data['password'];
+			$registration_data['_wp_http_referer'] = $registration_data['_wp_http_referer'];
 
 			if (isset($this->register_args['captcha'])) {
-				$captcha = $_POST['captcha'];
+				$captcha = $registration_data['captcha'];
 				if ($captcha == $_SESSION['cap_code']) {
 					
 				}  else {
 					$error['type'] = 'error';
 					$error['message'] = __('Invalid captcha.', 'cell-user');
-					ajax_response($error,$return);
+					ajax_response($error,$registration_data['_wp_http_referer']);
 				}
 			}
 
-			// if(preg_match('/^[.@a-z0-9_-]{3,25}$/i', $username) == 0){
-			// if(preg_match('/^[.@a-z0-9_-]$/i', $username) == 0){
+			// if(preg_match('/^[.@a-z0-9_-]{3,25}$/i', $registration_data['username']) == 0){
+			// if(preg_match('/^[.@a-z0-9_-]$/i', $registration_data['username']) == 0){
 			// 	$error['type'] = 'error';
 			// 	$error['message'] = __('Username not valid.', 'cell-user');
-			// 	ajax_response($error,$return);
+			// 	ajax_response($error,$registration_data['_wp_http_referer']);
 
-			// } elseif(!is_email($email))	{
-			if(!is_email($email))	{
+			// } elseif(!is_email($registration_data['email']))	{
+			if(!is_email($registration_data['email']))	{
 				$error['type'] = 'error';
 				$error['message'] = __('Email not valid.', 'cell-user');
-				ajax_response($error,$return);
+				ajax_response($error,$registration_data['_wp_http_referer']);
 
-			} elseif($password == "") {
+			} elseif($registration_data['password'] == "") {
 				$error['type'] = 'error';
 				$error['message'] = __('Password empty.', 'cell-user');
-				ajax_response($error,$return);
+				ajax_response($error,$registration_data['_wp_http_referer']);
 
-			} elseif( username_exists($username) || email_exists($email) ){
+			} elseif( username_exists($registration_data['username']) || email_exists($registration_data['email']) ){
 				$error['type'] = 'error';
 				$error['message'] = __('Username or email already registered.', 'cell-user');
-				ajax_response($error,$return);
+				ajax_response($error,$registration_data['_wp_http_referer']);
 
 			} else {
 
 				$user_registration_data = array(
-					'user_login' => sanitize_user($username),
-					'user_pass' => $password,
-					'user_email' => sanitize_email( $email ),
+					'user_login' => sanitize_user($registration_data['username']),
+					'user_pass' => $registration_data['password'],
+					'user_email' => sanitize_email( $registration_data['email'] ),
 					'role' => get_option('default_role'),
-					'display_name' => $username
+					'display_name' => $registration_data['username']
 				);
 
 				// check if user_url is submitted
-				if (isset($_POST['user_url']) && $_POST['user_url'] != '') {
-					$user_registration_data['user_url'] = $_POST['user_url'];
+				if (isset($registration_data['user_url']) && $registration_data['user_url'] != '') {
+					$user_registration_data['user_url'] = $registration_data['user_url'];
 				}
+
+
+				// check if registration-confirmation is true
+
+				if (isset($this->register_args['registration-confirmation'])) {
+					// Save registration data as wp options
+					// and then register on confirmation
+
+				} else {
+					// insert user without confirmation
+
+				}
+
+
 
 				$user_id = wp_insert_user( $user_registration_data );
 				
@@ -175,12 +192,12 @@ class CellRegister {
 					$domain = home_url();
 					$domain = str_replace('https://', '', $domain);
 					$domain = str_replace('http://', '', $domain);
-					$path = '/'.$username.'/';
+					$path = '/'.$registration_data['username'].'/';
 
 					$blog_option = $this->register_args['blog-options'];
 
 					// create blog
-					$blog_id = wpmu_create_blog( $domain, $path, $username, $user_id,$blog_option,1);
+					$blog_id = wpmu_create_blog( $domain, $path, $registration_data['username'], $user_id,$blog_option,1);
 
 					// add user to main blog
 					$main_blog = add_user_to_blog( 1, $user_id, 'subscriber' );
@@ -202,15 +219,15 @@ class CellRegister {
 
 				// save other attributes as usermeta
 				$default_field_key = array('username','email','password','registration_nonce','_wp_http_referer', 'action');
-				foreach ($_POST as $field_key => $field_value) {
+				foreach ($registration_data as $field_key => $field_value) {
 					if (!in_array($field_key, $default_field_key)) {
-						add_user_meta( $user_id, $field_key, $_POST[$field_key], TRUE );
+						add_user_meta( $user_id, $field_key, $registration_data[$field_key], TRUE );
 					}
 				}
 
 				// notification
-				$notification = wp_new_user_notification($user_id, $password);
-				$login = wp_signon( array( 'user_login' => $username, 'user_password' => $password, 'remember' => false ), false );
+				$notification = wp_new_user_notification($user_id, $registration_data['password']);
+				$login = wp_signon( array( 'user_login' => $registration_data['username'], 'user_password' => $registration_data['password'], 'remember' => false ), false );
 
 				// register hook
 				do_action( 'cell-register' );
@@ -223,6 +240,11 @@ class CellRegister {
 			}
 			die();
 		}
+	}
+
+	function process_registration($registration_data){
+
+
 	}
 
 	function get_captcha_image() {

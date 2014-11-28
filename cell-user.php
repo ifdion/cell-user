@@ -53,8 +53,6 @@ add_action('plugins_loaded', 'cell_user_init');
 
 // include_once ('settings.php');
 
-	include_once ('common-functions.php');
-
 	include_once ('login/login.php');
 
 	include_once ('register/register.php');

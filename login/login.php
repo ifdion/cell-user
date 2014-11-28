@@ -46,7 +46,7 @@ class CellLogin {
 				if (is_page( $this->login_args['redirect-success'] )) {
 					$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
 				} else {
-					$return = call_user_func_array( $this->login_args['redirect-success'] , $current_user->user_name);
+					$return = call_user_func( $this->login_args['redirect-success'] , $current_user->user_name);
 				}
 				$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
 			} else{
