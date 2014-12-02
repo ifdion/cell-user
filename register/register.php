@@ -195,7 +195,7 @@ class CellRegister {
 		// registration result
 		$success['type'] = 'success';
 		$success['message'] = __('Confirmation email sent. Please check your inbox or spam folder to confirm registration. ', 'cell-user');
-		ajax_response($success,$return);
+		ajax_response($success,get_bloginfo('url' ));
 
 	}
 
