@@ -18,6 +18,12 @@ class CellLogin {
 		// add a shortcode
 		add_shortcode('cell-user-login', array( $this, 'shortcode_output'));
 
+		// add a shortcode
+		add_shortcode('cell-user-logout', array( $this, 'shortcode_output_logout'));
+
+		// add a redirect on logout shortcode present
+		add_action( 'template_redirect', array($this, 'custom_shortcode_scripts'));
+
 		// add a redirect for logged out user
 		add_action('template_redirect', array( $this, 'redirect_user'));
 
@@ -78,6 +84,26 @@ class CellLogin {
 			return $login_form;
 		} else {
 			return false;
+		}
+	}
+
+	function shortcode_output_logout(){
+		if(is_user_logged_in()){
+			return 'login';
+		} else {
+			return 'logout';
+		}
+	}
+
+	function custom_shortcode_scripts() {
+		global $post;
+		if( (is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'cell-user-logout'))) {
+			wp_logout();
+			$return = home_url();
+
+			$result['type'] = 'success';
+			$result['message'] = __('Logout Success.', 'cell-user');
+			ajax_response($result,$return);
 		}
 	}
 
