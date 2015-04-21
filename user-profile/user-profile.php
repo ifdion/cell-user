@@ -41,6 +41,12 @@ class CellProfile {
 		// add a redirect for logged out user
 		add_action('template_redirect', array( $this, 'redirect_user'));
 
+		// add a shortcode
+		add_shortcode('cell-user-archive', array( $this, 'shortcode_output_archive'));
+
+		// add a redirect on logout shortcode present
+		add_action( 'template_redirect', array($this, 'custom_shortcode_user_archive'));
+
 		// add login ajax handler function
 		add_action('wp_ajax_frontend_profile', array( $this, 'process_frontend_profile_fields'));
 
@@ -104,6 +110,36 @@ class CellProfile {
 			return false;
 		}
 	}
+
+	function shortcode_output_archive(){
+		if(is_user_logged_in()){
+			return 'login';
+		} else {
+			return 'logout';
+		}
+	}
+
+	function custom_shortcode_user_archive() {
+		global $post;
+		if( (is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'cell-user-archive'))) {
+
+			if (is_user_logged_in()) {
+
+				$user_id = get_current_user_id();
+				$return = get_author_posts_url( $user_id);
+
+				wp_redirect($return);
+				exit();
+
+			} else {
+				$return = get_permalink(get_page_by_path('login'));
+				$result['type'] = 'danger';
+				$result['message'] = __('Please Login.', 'cell-user');
+				ajax_response($result,$return);
+			}
+		}
+	}
+
 
 	function process_frontend_profile_fields() {
 
