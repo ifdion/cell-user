@@ -17,10 +17,30 @@
 			<div class="control-group">
 				<label class="control-label" for="input01"><?php echo $value['title'] ?> <?php echo $required['text'] ?> </label>
 				<div class="controls">
-					<?php if ($value['type'] != 'textarea'): ?>
+					<?php if ($value['type'] == 'text'): ?>
 						<input type="<?php echo $value['type'] ?>" class="input-xlarge <?php echo $required['class'] ?>" id="<?php echo $key ?>" name="<?php echo $key ?>">
-					<?php else: ?>
+					<?php elseif ($value['type'] == 'select'): ?>
+						<?php if (isset($value['option'])): ?>
+							<?php
+								if (!is_array($value['option'])) {
+									$option = call_user_func_array($value['option'],array($current_user->ID));
+								} else {
+									$option = $value['option'];
+								}
+							?>
+							<select name="<?php echo $key ?>">
+								<?php foreach ($option as $option_value => $option_title): ?>
+									<option value="<?php echo $option_value ?>" > <?php echo $option_title ?></option>
+								<?php endforeach ?>
+							</select>
+						<?php else: ?>
+							<?php _e( 'Missing options.','cell-user' ) ?>
+						<?php endif ?>
+
+					<?php elseif ($value['type'] == 'textarea'): ?>
 						<textarea class="input-xlarge <?php echo $required['class'] ?>" id="<?php echo $key ?>" name="<?php echo $key ?>"></textarea>
+					<?php else: ?>
+						<input type="<?php echo $value['type'] ?>" class="input-xlarge <?php echo $required['class'] ?>" id="<?php echo $key ?>" name="<?php echo $key ?>">
 					<?php endif ?>
 					<?php if ($value['note']): ?>
 						<p class="help-block"><?php echo $value['note'] ?></p>
