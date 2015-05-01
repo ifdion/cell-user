@@ -100,8 +100,14 @@ class CellProfile {
 				}
 			}
 
+			if (locate_template('/cell-user/custom-profile-form.php')) {
+				$template = get_template_directory().'/cell-user/custom-profile-form.php';
+			} else {
+				$template = 'views/custom-profile-form.php';
+			}
+
 			ob_start();
-				include('views/custom-profile-form.php');
+				include($template);
 				$register_form = ob_get_contents();
 			ob_end_clean();
 
@@ -127,7 +133,6 @@ class CellProfile {
 
 				$user_id = get_current_user_id();
 				$return = get_author_posts_url( $user_id);
-
 				wp_redirect($return);
 				exit();
 
