@@ -70,13 +70,32 @@ class CellLogin {
 			wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
 			wp_localize_script( 'address', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 
+
+			if (locate_template('/cell-user/custom-login-form.php')) {
+				$template_login = get_template_directory().'/cell-user/custom-login-form.php';
+			} else {
+				$template_login = 'views/custom-login-form.php';
+			}
+
+			if (locate_template('/cell-user/custom-forgot-password-form.php')) {
+				$template_forgot_password = get_template_directory().'/cell-user/custom-forgot-password-form.php';
+			} else {
+				$template_forgot_password = 'views/custom-forgot-password-form.php';
+			}
+
+			if (locate_template('/cell-user/custom-reset-password-form.php')) {
+				$template_reset_password = get_template_directory().'/cell-user/custom-reset-password-form.php';
+			} else {
+				$template_reset_password = 'views/custom-reset-password-form.php';
+			}
+
 			ob_start();
 				if (isset($_REQUEST['forgot-password']) && $_REQUEST['forgot-password']==1) {
-					include('views/custom-forgot-password-form.php');
+					include($template_forgot_password);
 				} elseif( isset($_REQUEST['reset-password']) && $_REQUEST['reset-password']==1) {
-					include('views/custom-reset-password-form.php');
+					include($template_reset_password);
 				} else {
-					include('views/custom-login-form.php');
+					include($template_login);
 				}
 				$login_form = ob_get_contents();
 			ob_end_clean();

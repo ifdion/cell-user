@@ -87,8 +87,14 @@ class CellRegister {
 			wp_enqueue_style( 'cell-user-styles', plugins_url( 'cell-user/css/cell-user.css' ) );
 			wp_localize_script( 'address', 'global', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 
+			if (locate_template('/cell-user/custom-registration-form.php')) {
+				$template = get_template_directory().'/cell-user/custom-registration-form.php';
+			} else {
+				$template = 'views/custom-registration-form.php';
+			}
+
 			ob_start();
-			include('views/custom-registration-form.php');
+			include($template);
 			$register_form = ob_get_contents();
 			ob_end_clean();
 
