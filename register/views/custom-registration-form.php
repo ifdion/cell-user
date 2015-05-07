@@ -42,7 +42,7 @@
 					<?php else: ?>
 						<input type="<?php echo $value['type'] ?>" class="input-xlarge <?php echo $required['class'] ?>" id="<?php echo $key ?>" name="<?php echo $key ?>">
 					<?php endif ?>
-					<?php if ($value['note']): ?>
+					<?php if (isset($value['note'])): ?>
 						<p class="help-block"><?php echo $value['note'] ?></p>
 					<?php endif ?>
 				</div>

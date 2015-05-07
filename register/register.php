@@ -222,7 +222,12 @@ class CellRegister {
 		$user_id = wp_insert_user( $user_registration_data );		
 
 		if (isset($this->register_args['redirect-success'])) {
-			$return = get_permalink( get_page_by_path( $this->register_args['redirect-success'] ) );
+			$page = get_page_by_path($this->register_args['redirect-success']);
+			if ($page) {
+				$return = get_permalink( get_page_by_path( $this->register_args['redirect-success'] ) );
+			} else {
+				$return = call_user_func_array($this->register_args['redirect-success'], $user_registration_data);
+			}
 		} else {
 			$return = add_query_arg(array('new'=>1), get_bloginfo('url'));
 		}
