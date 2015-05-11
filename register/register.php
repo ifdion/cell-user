@@ -252,7 +252,7 @@ class CellRegister {
 			switch_to_blog( $blog_id );
 
 			// register blog hook
-			do_action( 'cell-blog-register' );
+			do_action( 'cell-blog-register', $registration_data);
 
 			if (isset($this->register_args['redirect-success'])) {
 				$return = get_permalink( get_page_by_path( $this->register_args['redirect-success'] ) );
@@ -275,7 +275,7 @@ class CellRegister {
 		$login = wp_signon( array( 'user_login' => $registration_data['username'], 'user_password' => $registration_data['password'], 'remember' => false ), false );
 
 		// register hook
-		do_action( 'cell-register' );
+		do_action( 'cell-register', $registration_data );
 
 		// registration result
 		$success['type'] = 'success';
