@@ -42,10 +42,10 @@ class CellProfile {
 		add_action('template_redirect', array( $this, 'redirect_user'));
 
 		// add a shortcode
-		add_shortcode('cell-user-archive', array( $this, 'shortcode_output_archive'));
+		// add_shortcode('cell-user-archive', array( $this, 'shortcode_output_archive'));
 
 		// add a redirect on logout shortcode present
-		add_action( 'template_redirect', array($this, 'custom_shortcode_user_archive'));
+		// add_action( 'template_redirect', array($this, 'custom_shortcode_user_archive'));
 
 		// add login ajax handler function
 		add_action('wp_ajax_frontend_profile', array( $this, 'process_frontend_profile_fields'));
@@ -60,6 +60,10 @@ class CellProfile {
 		// saving admin profile field
 		add_action( 'personal_options_update', array( $this,'save_admin_extra_profile_fields' ));
 		add_action( 'edit_user_profile_update', array( $this,'save_admin_extra_profile_fields' ));
+
+		// add rewrite
+		// add_filter( 'generate_rewrite_rules', array( $this, 'user_archive_rewrite') );
+		// add_action( 'init', array($this, 'add_gl_rewrite_tag') );
 	}
 	
 	function redirect_user(){
@@ -117,33 +121,146 @@ class CellProfile {
 		}
 	}
 
-	function shortcode_output_archive(){
-		if(is_user_logged_in()){
-			return 'login';
-		} else {
-			return 'logout';
-		}
-	}
+	// function shortcode_output_archive($atts){
 
-	function custom_shortcode_user_archive() {
-		global $post;
-		if( (is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'cell-user-archive'))) {
+	// 	$atts = shortcode_atts(
+	// 		array(
+	// 			'meta_key' => null,
+	// 			'meta_value' => null,
+	// 			'number' => 10,
+	// 			'template' => null,
+	// 		), $atts, 'user-profile' );
+	// 	$meta_key = $atts['meta_key'];
+	// 	$meta_value = $atts['meta_value'];
+	// 	$number = $atts['number'];
+	// 	$custom_template = $atts['template'];
+		
+	// 	if (isset($_GET['user'])) {
+	// 		$user = get_user_by('slug', $_GET['user'] );
 
-			if (is_user_logged_in()) {
+	// 		if ($user) {
+	// 			$template = 'views/user-public-profile.php';
 
-				$user_id = get_current_user_id();
-				$return = get_author_posts_url( $user_id);
-				wp_redirect($return);
-				exit();
+	// 			// check for custom default template
+	// 			if (locate_template('cell-user/user-public-profile.php') != '') {
+	// 				$template = get_stylesheet_directory().'/cell-user/user-public-profile.php';
+	// 			}
 
-			} else {
-				$return = get_permalink(get_page_by_path('login'));
-				$result['type'] = 'danger';
-				$result['message'] = __('Please Login.', 'cell-user');
-				ajax_response($result,$return);
-			}
-		}
-	}
+	// 			// check for custom template
+	// 			if ($custom_template && locate_template($custom_template) != '') {
+	// 				$template = get_stylesheet_directory().'/'.$custom_template;
+	// 			}
+
+	// 			ob_start();
+	// 			include $template;
+	// 			$output_part = ob_get_contents();
+	// 			ob_end_clean();
+				
+	// 			return $output_part;
+	// 		} else {
+	// 			return '<p> User not found </p>';
+	// 		}
+	// 	} else {
+
+	// 		if (isset($this->profile_args['page-archive'])) {
+	// 			$archive_page = $this->profile_args['page-archive'];
+	// 		} else {
+	// 			$archive_page = $this->default_archive_page;
+	// 		}
+
+	// 		$user_page_url = get_permalink(get_page_by_path($archive_page));
+
+	// 		$user_page = 1;
+	// 		if (isset($wp_query->query_vars['page']) && $wp_query->query_vars['page'] != 0) {
+	// 			$user_page = $wp_query->query_vars['page'];
+	// 		};
+
+	// 		// TEST
+	// 		// $number = 2;
+
+	// 		$user_query_args = array(
+	// 			'number' => $number
+	// 		);
+	// 		if ($meta_key) {
+	// 			$user_query_args['meta_key'] = $meta_key;
+	// 		}
+	// 		if ($meta_value) {
+	// 			$user_query_args['meta_value'] = $meta_value;
+	// 		}
+	// 		if ($user_page > 1) {
+	// 			$user_query_args['offset'] = ($user_page - 1) * $number;
+	// 		}
+
+	// 		$user_query = new WP_User_Query( $user_query_args );
+	// 		$total_page = ceil($user_query->total_users / $number);
+			
+	// 		// echo '<pre>';
+	// 		// print_r($user_query);
+	// 		// echo '</pre>';
+
+	// 		$template = 'views/user-grid.php';
+
+	// 		// check for custom default template
+	// 		if (locate_template('cell-user/user-grid.php') != '') {
+	// 			$template = get_stylesheet_directory().'cell-user/user-grid.php';
+	// 		}
+
+	// 		// check for custom template
+	// 		if ($custom_template && locate_template($custom_template) != '') {
+	// 			$template = get_stylesheet_directory().'/'.$custom_template;
+	// 		}
+
+	// 		$pagination_template = 'views/pagination.php';
+
+	// 		// check for custom default template
+	// 		if (locate_template('cell-user/pagination.php') != '') {
+	// 			$template = get_stylesheet_directory().'cell-user/pagination.php';
+	// 		}
+
+	// 		if ($user_query->total_users > 0) {
+	// 			$output = '';
+	// 			foreach ($user_query->results as $key => $value) {
+	// 				ob_start();
+	// 				include $template;
+	// 				$output_part = ob_get_contents();
+	// 				ob_end_clean();
+	// 				$output .= $output_part;
+	// 			}
+
+	// 			if ($user_query->total_users > $number) {
+	// 				ob_start();
+	// 				include $pagination_template;
+	// 				$pagination = ob_get_contents();
+	// 				ob_end_clean();
+
+	// 				$output .= $pagination;
+	// 			}
+	// 			return $output;
+
+	// 		} else {
+	// 			return '<p> User not found</p>';
+	// 		}
+	// 	}
+	// }
+
+	// function user_archive_rewrite($wp_rewrite){
+	// 	if (isset($this->profile_args['page-archive'])) {
+	// 		$archive_page = $this->profile_args['page-archive'];
+	// 	} else {
+	// 		$archive_page = $this->default_archive_page;
+	// 	}
+	// 	$tax_rules = array(
+	// 		$archive_page.'/(.+)/?$' => 'index.php?pagename='.$archive_page.'&user_name='. $wp_rewrite->preg_index(1),
+	// 	);
+
+	// 	$wp_rewrite->rules = $tax_rules + $wp_rewrite->rules;
+
+	// }
+
+	// function add_gl_rewrite_tag() {
+	// 	// user related
+	// 	add_rewrite_tag("%user_name%", '(.+)');
+	// }
 
 
 	function process_frontend_profile_fields() {
