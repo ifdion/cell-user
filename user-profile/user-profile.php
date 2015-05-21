@@ -36,13 +36,14 @@ class CellProfile {
 		$this->admin_preset_meta = array('first_name','last_name','nickname','description','rich_editing','comment_shortcuts','admin_color','use_ssl','show_admin_bar_front','aim','yim','jabber');
 
 		// add a shortcode
-		add_shortcode('cell-user-profile', array( $this, 'shortcode_output'));
+		add_shortcode('cell-user-profile', array( $this, 'shortcode_user_profile'));
 
 		// add a redirect for logged out user
 		add_action('template_redirect', array( $this, 'redirect_user'));
 
-		// add a shortcode
-		// add_shortcode('cell-user-archive', array( $this, 'shortcode_output_archive'));
+		// add a shortcode to redirect user to their own author page
+		add_shortcode('cell-user-author-archive', array( $this, 'shortcode_author_archive'));
+		add_action( 'template_redirect', array($this, 'redirect_to_author_archive'));
 
 		// add a redirect on logout shortcode present
 		// add_action( 'template_redirect', array($this, 'custom_shortcode_user_archive'));
@@ -79,7 +80,7 @@ class CellProfile {
 		}
 	}
 
-	function shortcode_output(){
+	function shortcode_user_profile(){
 
 		if (isset($this->profile_args['fieldset'])) {
 			$profile_field = $this->profile_args['fieldset'];
@@ -119,6 +120,32 @@ class CellProfile {
 		} else {
 			return false;
 		}
+	}
+
+	function redirect_to_author_archive() {
+		global $post;
+
+		if( (is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'cell-user-author-archive'))) {
+
+			if (is_user_logged_in()) {
+
+				$user_id = get_current_user_id();
+				$return = get_author_posts_url( $user_id);
+				wp_redirect($return);
+				exit();
+
+			} else {
+				$return = get_permalink(get_page_by_path('login'));
+				$result['type'] = 'danger';
+				$result['message'] = __('Please Login.', 'cell-user');
+				ajax_response($result,$return);
+			}
+		}
+	}
+
+	function shortcode_author_archive(){
+		// return nothing
+		return true;
 	}
 
 	// function shortcode_output_archive($atts){
