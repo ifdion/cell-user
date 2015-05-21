@@ -127,72 +127,59 @@ class CellLogin {
 	}
 
 	function process_login() {
-		if ( empty($_POST) || !wp_verify_nonce($_POST['login_nonce'],'frontend_login') ) {
-			echo 'Sorry, your nonce did not verify.';
-			die();
-		} else {
-			// validate data
-			$username = $_POST['username'];
-			$password = $_POST['password'];
+		// validate data
+		$return_error = get_bloginfo('url');
+		$return = get_bloginfo('url');
+		if (isset($_POST['_wp_http_referer'])) {
 			$return_error = $_POST['_wp_http_referer'];
+		}
 
-			$return = get_bloginfo('url');
+		// detect empty field
+		if (!isset($_POST['username']) || !isset($_POST['password']) || $_POST['username'] == "" || $_POST['password'] == "") {
+			$result['type'] = 'error';
+			$result['message'] = __('Field empty.', 'cell-user');
+			ajax_response($result,$return_error);
+		}
 
+		// login data
+		$username = $_POST['username'];
+		$password = $_POST['password'];
+		
+		// check
+		if (email_exists($username)) {
+			$user = get_user_by('email', $username);
+		} elseif (username_exists($username)) {
+			$user = get_user_by('login', $username);
+		}
 
-			if ($username == "" || $password == "") {
-				$result['type'] = 'error';
-				$result['message'] = __('Field empty.', 'cell-user');
-				ajax_response($result,$return_error);
-
-			} elseif (email_exists($username)) {
-
-				$user = get_user_by('email', $username);
-				// get return from user data
-				if (isset($this->login_args['redirect-success'])) {
-					if (is_page( $this->login_args['redirect-success'] )) {
-						$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
-					} else {
-						$return = call_user_func_array( $this->login_args['redirect-success'] , array($user->ID));
-					}
-				}
-
-				$login = wp_signon( array( 'user_login' => $user->user_login, 'user_password' => $password, 'remember' => false ), false );
-				if (is_wp_error($login)) {
-					$result['type'] = 'error';
-					$result['message'] = __('Login error, please check your username and password.', 'cell-user');
-					ajax_response($result,$return_error);
+		if ($user) {
+			$user_meta = get_user_meta( $user->ID );
+			// get return from user data
+			if (isset($this->login_args['redirect-success'])) {
+				if (is_page( $this->login_args['redirect-success'] )) {
+					$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
 				} else {
-					$result['type'] = 'success';
-					$result['message'] = __('Login Success.', 'cell-user');
-					ajax_response($result,$return);
+					$return = call_user_func_array( $this->login_args['redirect-success'] , array($user->ID));
 				}
-			} elseif (username_exists($username)) {
+			}
 
-				$user = get_user_by('login', $username);
-				// get return from user data
-				if (isset($this->login_args['redirect-success'])) {
-					if (is_page( $this->login_args['redirect-success'] )) {
-						$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
-					} else {
-						$return = call_user_func_array( $this->login_args['redirect-success'] , array($user->ID));
-					}
-				}
-
-				$login = wp_signon( array( 'user_login' => $username, 'user_password' => $password, 'remember' => false ), false );
-				if (is_wp_error($login)) {
-					$result['type'] = 'error';
-					$result['message'] = __('Login error, please check your username and password.', 'cell-user');
-					ajax_response($result,$return_error);
-				} else {
-					$result['type'] = 'success';
-					$result['message'] = __('Login Success.', 'cell-user');
-					ajax_response($result,$return);
-				}
-			} else {
+			$login = wp_signon( array( 'user_login' => $user->user_login, 'user_password' => $password, 'remember' => false ), false );
+			if (is_wp_error($login)) {
 				$result['type'] = 'error';
 				$result['message'] = __('Login error, please check your username and password.', 'cell-user');
 				ajax_response($result,$return_error);
+			} else {
+				$result['type'] = 'success';
+				$result['message'] = __('Login Success.', 'cell-user');
+				$result['user_data'] = $user;
+				$result['user_meta'] = $user_meta;
+				ajax_response($result,$return);
 			}
+
+		} else {
+			$result['type'] = 'error';
+			$result['message'] = __('Login error, please check your username and password.', 'cell-user');
+			ajax_response($result,$return_error);
 		}
 	}
 
