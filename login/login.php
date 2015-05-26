@@ -8,6 +8,8 @@
  **/
 
 
+include_once 'hooks.php';
+
 class CellLogin {
 
 	function __construct($args) {
@@ -127,23 +129,24 @@ class CellLogin {
 	}
 
 	function process_login() {
+
 		// validate data
 		$return_error = get_bloginfo('url');
 		$return = get_bloginfo('url');
-		if (isset($_POST['_wp_http_referer'])) {
-			$return_error = $_POST['_wp_http_referer'];
+		if (isset($_REQUEST['_wp_http_referer'])) {
+			$return_error = $_REQUEST['_wp_http_referer'];
 		}
 
 		// detect empty field
-		if (!isset($_POST['username']) || !isset($_POST['password']) || $_POST['username'] == "" || $_POST['password'] == "") {
+		if (!isset($_REQUEST['username']) || !isset($_REQUEST['password']) || $_REQUEST['username'] == "" || $_REQUEST['password'] == "") {
 			$result['type'] = 'error';
 			$result['message'] = __('Field empty.', 'cell-user');
 			ajax_response($result,$return_error);
 		}
 
 		// login data
-		$username = $_POST['username'];
-		$password = $_POST['password'];
+		$username = $_REQUEST['username'];
+		$password = $_REQUEST['password'];
 		
 		// check
 		if (email_exists($username)) {
@@ -152,7 +155,7 @@ class CellLogin {
 			$user = get_user_by('login', $username);
 		}
 
-		if ($user) {
+		if (isset($user)) {
 			$user_meta = get_user_meta( $user->ID );
 			// get return from user data
 			if (isset($this->login_args['redirect-success'])) {
@@ -171,8 +174,8 @@ class CellLogin {
 			} else {
 				$result['type'] = 'success';
 				$result['message'] = __('Login Success.', 'cell-user');
-				$result['user_data'] = $user;
-				$result['user_meta'] = $user_meta;
+				$result['content']['user_data'] = apply_filters( 'cell-user-login-data', $user );
+				$result['content']['user_meta'] = apply_filters('cell-user-login-meta', $user_meta);
 				ajax_response($result,$return);
 			}
 
