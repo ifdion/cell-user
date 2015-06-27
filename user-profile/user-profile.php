@@ -69,7 +69,7 @@ class CellProfile {
 	
 	function redirect_user(){
 		if (isset($this->profile_args['page']) && is_page($this->profile_args['page']) && !is_user_logged_in()){
-			$result['type'] = 'error';
+			$result['type'] = 'danger';
 			$result['message'] = __('Please login.', 'cell-user');
 			if (isset($this->profile_args['redirect-noaccess'])) {
 				$return = get_permalink( get_page_by_path( $this->profile_args['redirect-noaccess'] ) );
@@ -314,7 +314,7 @@ class CellProfile {
 			if (isset($_POST['user_email']) && isset($_POST['user_email_old'])) {
 				if ($_POST['user_email'] != $_POST['user_email_old'] && is_email( $_POST['user_email'] )) {
 					if (email_exists( $_POST['user_email'] )) {
-						$result['type'] = 'error';
+						$result['type'] = 'danger';
 						$result['message'] = __('Email already used.', 'cell-user');
 						ajax_response($result,$return);
 					}
@@ -326,7 +326,7 @@ class CellProfile {
 
 			if (isset($_POST['user_passwors']) && $_POST['user_password'] != '') {
 				if ($_POST['user_password'] != $_POST['user_password_retype']) {
-					$result['type'] = 'error';
+					$result['type'] = 'danger';
 					$result['message'] = __('Password did not match.', 'cell-user');
 					ajax_response($result,$return);
 				} else{

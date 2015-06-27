@@ -139,7 +139,7 @@ class CellLogin {
 
 		// detect empty field
 		if (!isset($_REQUEST['username']) || !isset($_REQUEST['password']) || $_REQUEST['username'] == "" || $_REQUEST['password'] == "") {
-			$result['type'] = 'error';
+			$result['type'] = 'danger';
 			$result['message'] = __('Field empty.', 'cell-user');
 			ajax_response($result,$return_error);
 		}
@@ -168,7 +168,7 @@ class CellLogin {
 
 			$login = wp_signon( array( 'user_login' => $user->user_login, 'user_password' => $password, 'remember' => false ), false );
 			if (is_wp_error($login)) {
-				$result['type'] = 'error';
+				$result['type'] = 'danger';
 				$result['message'] = __('Login error, please check your username and password.', 'cell-user');
 				ajax_response($result,$return_error);
 			} else {
@@ -180,7 +180,7 @@ class CellLogin {
 			}
 
 		} else {
-			$result['type'] = 'error';
+			$result['type'] = 'danger';
 			$result['message'] = __('Login error, please check your username and password.', 'cell-user');
 			ajax_response($result,$return_error);
 		}
@@ -195,7 +195,7 @@ class CellLogin {
 			$username = $_POST['username'];
 			$return = $_POST['_wp_http_referer'];
 			if (!$username) {
-				$result['type'] = 'error';
+				$result['type'] = 'danger';
 				$result['message'] = __('Field empty.', 'cell-user');
 				ajax_response($result,$return);
 				die();
@@ -205,7 +205,7 @@ class CellLogin {
 				} elseif(email_exists($username)) {
 					$user = get_user_by('email', $username);
 				} else {
-					$result['type'] = 'error';
+					$result['type'] = 'danger';
 					$result['message'] = __('Username or Email does not exist.', 'cell-user');
 					ajax_response($result,$return);
 					die();
@@ -266,16 +266,16 @@ class CellLogin {
 			$user_data = $wpdb->get_row($wpdb->prepare("SELECT ID, user_login, user_email FROM $wpdb->users WHERE user_activation_key = %s AND user_login = %s", $reset_key, $user_login));
 
 			if(!$user_data){
-				$result['type'] = 'error';
+				$result['type'] = 'danger';
 				$result['message'] = __('User not found.', 'cell-user');
 				ajax_response($result,$return);
 			} elseif(!$reset_key) {
-				$result['type'] = 'error';
+				$result['type'] = 'danger';
 				$result['message'] = __('Activation key not found.', 'cell-user');
 				ajax_response($result,$return);
 			} else {
 				if ($password1 &&($password1 != $password2)) {
-					$result['type'] = 'error';
+					$result['type'] = 'danger';
 					$result['message'] = __('Input password is incorrect.', 'cell-user');
 					ajax_response($result,$return);
 				} else {

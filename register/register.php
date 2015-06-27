@@ -128,7 +128,7 @@ class CellRegister {
 				if ($captcha == $_SESSION['cap_code']) {
 					
 				}  else {
-					$error['type'] = 'error';
+					$error['type'] = 'danger';
 					$error['message'] = __('Invalid captcha.', 'cell-user');
 					ajax_response($error,$registration_data['_wp_http_referer']);
 				}
@@ -136,23 +136,23 @@ class CellRegister {
 
 			// if(preg_match('/^[.@a-z0-9_-]{3,25}$/i', $registration_data['username']) == 0){
 			// if(preg_match('/^[.@a-z0-9_-]$/i', $registration_data['username']) == 0){
-			// 	$error['type'] = 'error';
+			// 	$error['type'] = 'danger';
 			// 	$error['message'] = __('Username not valid.', 'cell-user');
 			// 	ajax_response($error,$registration_data['_wp_http_referer']);
 
 			// } elseif(!is_email($registration_data['email']))	{
 			if(!is_email($registration_data['email']))	{
-				$error['type'] = 'error';
+				$error['type'] = 'danger';
 				$error['message'] = __('Email not valid.', 'cell-user');
 				ajax_response($error,$registration_data['_wp_http_referer']);
 
 			} elseif($registration_data['password'] == "") {
-				$error['type'] = 'error';
+				$error['type'] = 'danger';
 				$error['message'] = __('Password empty.', 'cell-user');
 				ajax_response($error,$registration_data['_wp_http_referer']);
 
 			} elseif( username_exists($registration_data['username']) || email_exists($registration_data['email']) ){
-				$error['type'] = 'error';
+				$error['type'] = 'danger';
 				$error['message'] = __('Username or email already registered.', 'cell-user');
 				ajax_response($error,$registration_data['_wp_http_referer']);
 
@@ -295,7 +295,7 @@ class CellRegister {
 		if ($registration_data) {
 			$registration = $this->process_registration($registration_data);
 		} else {
-			$error['type'] = 'error';
+			$error['type'] = 'danger';
 			$error['message'] = __('Registration invalid. [code:01]', 'cell-user');
 			ajax_response($error,$registration_data['_wp_http_referer']);
 		}
