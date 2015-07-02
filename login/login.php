@@ -64,7 +64,7 @@ class CellLogin {
 		}
 	}
 
-	function shortcode_output(){
+	function shortcode_output($atts){
 		if(!is_user_logged_in()){
 
 			// add addrees script
@@ -142,6 +142,10 @@ class CellLogin {
 			$result['type'] = 'danger';
 			$result['message'] = __('Field empty.', 'cell-user');
 			ajax_response($result,$return_error);
+		}
+
+		if (isset($_REQUEST['return_success'])) {
+			$return = get_permalink(get_page_by_path($_REQUEST['return_success'] ));
 		}
 
 		// login data
