@@ -8,6 +8,8 @@
  **/
 
 
+include_once 'hooks.php';
+
 class CellLogin {
 
 	function __construct($args) {
@@ -62,7 +64,7 @@ class CellLogin {
 		}
 	}
 
-	function shortcode_output(){
+	function shortcode_output($atts){
 		if(!is_user_logged_in()){
 
 			// add addrees script
@@ -127,72 +129,64 @@ class CellLogin {
 	}
 
 	function process_login() {
-		if ( empty($_POST) || !wp_verify_nonce($_POST['login_nonce'],'frontend_login') ) {
-			echo 'Sorry, your nonce did not verify.';
-			die();
-		} else {
-			// validate data
-			$username = $_POST['username'];
-			$password = $_POST['password'];
-			$return_error = $_POST['_wp_http_referer'];
 
-			$return = get_bloginfo('url');
+		// validate data
+		$return_error = get_bloginfo('url');
+		$return = get_bloginfo('url');
+		if (isset($_REQUEST['_wp_http_referer'])) {
+			$return_error = $_REQUEST['_wp_http_referer'];
+		}
 
+		// detect empty field
+		if (!isset($_REQUEST['username']) || !isset($_REQUEST['password']) || $_REQUEST['username'] == "" || $_REQUEST['password'] == "") {
+			$result['type'] = 'danger';
+			$result['message'] = __('Field empty.', 'cell-user');
+			ajax_response($result,$return_error);
+		}
 
-			if ($username == "" || $password == "") {
-				$result['type'] = 'error';
-				$result['message'] = __('Field empty.', 'cell-user');
-				ajax_response($result,$return_error);
+		if (isset($_REQUEST['return_success'])) {
+			$return = get_permalink(get_page_by_path($_REQUEST['return_success'] ));
+		}
 
-			} elseif (email_exists($username)) {
+		// login data
+		$username = $_REQUEST['username'];
+		$password = $_REQUEST['password'];
+		
+		// check
+		if (email_exists($username)) {
+			$user = get_user_by('email', $username);
+		} elseif (username_exists($username)) {
+			$user = get_user_by('login', $username);
+		}
 
-				$user = get_user_by('email', $username);
-				// get return from user data
-				if (isset($this->login_args['redirect-success'])) {
-					if (is_page( $this->login_args['redirect-success'] )) {
-						$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
-					} else {
-						$return = call_user_func_array( $this->login_args['redirect-success'] , array($user->ID));
-					}
-				}
-
-				$login = wp_signon( array( 'user_login' => $user->user_login, 'user_password' => $password, 'remember' => false ), false );
-				if (is_wp_error($login)) {
-					$result['type'] = 'error';
-					$result['message'] = __('Login error, please check your username and password.', 'cell-user');
-					ajax_response($result,$return_error);
+		if (isset($user)) {
+			$user_meta = get_user_meta( $user->ID );
+			// get return from user data
+			if (isset($this->login_args['redirect-success'])) {
+				if (is_page( $this->login_args['redirect-success'] )) {
+					$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
 				} else {
-					$result['type'] = 'success';
-					$result['message'] = __('Login Success.', 'cell-user');
-					ajax_response($result,$return);
+					$return = call_user_func_array( $this->login_args['redirect-success'] , array($user->ID));
 				}
-			} elseif (username_exists($username)) {
+			}
 
-				$user = get_user_by('login', $username);
-				// get return from user data
-				if (isset($this->login_args['redirect-success'])) {
-					if (is_page( $this->login_args['redirect-success'] )) {
-						$return = get_permalink( get_page_by_path( $this->login_args['redirect-success'] ) );
-					} else {
-						$return = call_user_func_array( $this->login_args['redirect-success'] , array($user->ID));
-					}
-				}
-
-				$login = wp_signon( array( 'user_login' => $username, 'user_password' => $password, 'remember' => false ), false );
-				if (is_wp_error($login)) {
-					$result['type'] = 'error';
-					$result['message'] = __('Login error, please check your username and password.', 'cell-user');
-					ajax_response($result,$return_error);
-				} else {
-					$result['type'] = 'success';
-					$result['message'] = __('Login Success.', 'cell-user');
-					ajax_response($result,$return);
-				}
-			} else {
-				$result['type'] = 'error';
+			$login = wp_signon( array( 'user_login' => $user->user_login, 'user_password' => $password, 'remember' => false ), false );
+			if (is_wp_error($login)) {
+				$result['type'] = 'danger';
 				$result['message'] = __('Login error, please check your username and password.', 'cell-user');
 				ajax_response($result,$return_error);
+			} else {
+				$result['type'] = 'success';
+				$result['message'] = __('Login Success.', 'cell-user');
+				$result['content']['user_data'] = apply_filters( 'cell-user-login-data', $user );
+				$result['content']['user_meta'] = apply_filters('cell-user-login-meta', $user_meta);
+				ajax_response($result,$return);
 			}
+
+		} else {
+			$result['type'] = 'danger';
+			$result['message'] = __('Login error, please check your username and password.', 'cell-user');
+			ajax_response($result,$return_error);
 		}
 	}
 
@@ -205,7 +199,7 @@ class CellLogin {
 			$username = $_POST['username'];
 			$return = $_POST['_wp_http_referer'];
 			if (!$username) {
-				$result['type'] = 'error';
+				$result['type'] = 'danger';
 				$result['message'] = __('Field empty.', 'cell-user');
 				ajax_response($result,$return);
 				die();
@@ -215,7 +209,7 @@ class CellLogin {
 				} elseif(email_exists($username)) {
 					$user = get_user_by('email', $username);
 				} else {
-					$result['type'] = 'error';
+					$result['type'] = 'danger';
 					$result['message'] = __('Username or Email does not exist.', 'cell-user');
 					ajax_response($result,$return);
 					die();
@@ -276,16 +270,16 @@ class CellLogin {
 			$user_data = $wpdb->get_row($wpdb->prepare("SELECT ID, user_login, user_email FROM $wpdb->users WHERE user_activation_key = %s AND user_login = %s", $reset_key, $user_login));
 
 			if(!$user_data){
-				$result['type'] = 'error';
+				$result['type'] = 'danger';
 				$result['message'] = __('User not found.', 'cell-user');
 				ajax_response($result,$return);
 			} elseif(!$reset_key) {
-				$result['type'] = 'error';
+				$result['type'] = 'danger';
 				$result['message'] = __('Activation key not found.', 'cell-user');
 				ajax_response($result,$return);
 			} else {
 				if ($password1 &&($password1 != $password2)) {
-					$result['type'] = 'error';
+					$result['type'] = 'danger';
 					$result['message'] = __('Input password is incorrect.', 'cell-user');
 					ajax_response($result,$return);
 				} else {

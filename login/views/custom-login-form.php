@@ -30,5 +30,8 @@
 		<button type="submit" class="btn btn-primary"><?php _e('Login', 'cell-user') ?></button>
 		<?php wp_nonce_field('frontend_login','login_nonce'); ?>
 		<input  name="action" value="frontend_login" type="hidden">
+		<?php if (isset($atts['return_success'])): ?>
+			<input  name="return_success" value="<?php echo $atts['return_success'] ?>" type="hidden">
+		<?php endif ?>
 	</div>
 </form>
