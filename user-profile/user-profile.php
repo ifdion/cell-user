@@ -318,6 +318,14 @@ class CellProfile {
 			foreach ($profile_field as $key => $value){
 				$user_fields = array_merge($user_fields, $value['fields']);
 			}
+
+			// echo '<pre>';
+			// print_r($_POST);
+			// print_r($_FILES);
+			// print_r($user_fields);
+			// echo '</pre>';
+			// die();
+
 			// save each field
 			foreach ($user_fields as $field_key => $field_detail) {
 				// special way to save for checkbox
@@ -328,6 +336,15 @@ class CellProfile {
 				}
 				if (isset($_POST[$field_key])) {
 					update_user_meta( $_POST['user_id'], $field_key, $_POST[$field_key] );
+				}
+
+				if (isset($_FILES[$field_key]) && ($_FILES[$field_key]['size'] > 0)) {
+
+					$new_file = $_FILES[$field_key];
+					$attached_file = attach_uploads($new_file);
+					if($attached_file){
+						update_user_meta( $_POST['user_id'], $field_key, $attached_file );
+					}
 				}
 			}
 

@@ -151,6 +151,24 @@
 									</div>
 								<?php
 							break;
+							case 'image':
+								?>
+									<div class="control-group">
+										<label class="control-label" for="<?php echo $field_key ?>"><?php echo $field_value['title'] ?></label>
+										<div class="controls">
+											<?php
+												$values = unserialize($current_value);
+												if (is_array($values)) {
+													foreach ($values as $value) {
+														echo wp_get_attachment_image( $value, 'thumbnail');
+													}
+												}
+											?>
+											<input type="file" class="input-xlarge <?php echo $added_class ?>" id="<?php echo $field_key ?>" name="<?php echo $field_key ?>[]" value="<?php echo $current_value ?>" <?php echo $additional_attr ?>>
+										</div>
+									</div>
+								<?php
+							break;
 							default:
 							break;
 						}
