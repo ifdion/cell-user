@@ -164,7 +164,7 @@
 													}
 												}
 											?>
-											<input type="file" class="input-xlarge <?php echo $added_class ?>" id="<?php echo $field_key ?>" name="<?php echo $field_key ?>[]" value="<?php echo $current_value ?>" <?php echo $additional_attr ?>>
+											<input type="file" class="input-xlarge <?php echo $added_class ?>" id="<?php echo $field_key ?>" name="<?php echo $field_key ?>[]" <?php echo $additional_attr ?>>
 										</div>
 									</div>
 								<?php
